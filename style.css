@@ -1,0 +1,881 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4fbfb;
+    color: #123f46;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.navbar {
+    height: 75px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    position: relative;
+    z-index: 10;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #0b6670;
+}
+
+.logo span {
+    font-size: 30px;
+    margin-right: 6px;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.nav-links a {
+    font-size: 15px;
+    color: #24565d;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.nav-links a:hover {
+    color: #0b8994;
+}
+
+.profile {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #e4f5f6;
+    color: #0b6670;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+.hero {
+    min-height: 670px;
+    background-image: linear-gradient(
+        rgba(7, 91, 98, 0.55),
+        rgba(7, 91, 98, 0.55)
+    ),
+    url("https://static.vecteezy.com/system/resources/thumbnails/070/253/529/small/scenic-view-of-a-vibrant-turquoise-bay-surrounded-by-lush-greenery-and-rocky-cliffs-under-a-clear-sky-photo.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    padding: 60px 10%;
+}
+
+.hero-content {
+    max-width: 700px;
+    position: relative;
+    z-index: 2;
+}
+
+.hero h1 {
+    font-size: 52px;
+    line-height: 1.15;
+    color: #ffffff !important;
+    margin-bottom: 25px;
+    font-weight: 700;
+}
+
+.hero p {
+    font-size: 20px;
+    color: #ffffff !important;
+    margin-bottom: 35px;
+}
+
+.hero-btn {
+    display: inline-block;
+    background: #ffffff;
+    color: #087f89 !important;
+    padding: 16px 30px;
+    border-radius: 8px;
+    font-size: 17px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.home-hero {
+    min-height: 670px;
+    background-image: linear-gradient(
+        rgba(7, 91, 98, 0.45),
+        rgba(7, 91, 98, 0.45)
+    ),
+    url("https://images.pexels.com/photos/29120353/pexels-photo-29120353/free-photo-of-stunning-beach-and-cliffs-at-nusa-penida-bali.jpeg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    padding: 60px 10%;
+}
+
+.home-hero .hero-content {
+    max-width: 700px;
+    position: relative;
+    z-index: 2;
+}
+
+.home-hero h1 {
+    font-size: 52px;
+    line-height: 1.15;
+    color: #fff !important;
+    margin-bottom: 25px;
+    font-weight: 700;
+}
+
+.home-hero p {
+    font-size: 20px;
+    color: #fff !important;
+    margin-bottom: 35px;
+}
+
+.home-hero .hero-btn {
+    display: inline-block;
+    background: #fff;
+    color: #087f89 !important;
+    padding: 16px 30px;
+    border-radius: 8px;
+    font-size: 17px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.section {
+    padding: 70px 8%;
+    background: white;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 32px;
+    color: #104f57;
+    margin-bottom: 45px;
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+}
+
+.feature-card {
+    background: #f5fbfb;
+    border-radius: 15px;
+    padding: 30px 20px;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0, 70, 80, 0.08);
+    transition: 0.3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-6px);
+}
+
+.feature-icon {
+    font-size: 42px;
+    margin-bottom: 18px;
+}
+
+.feature-card h3 {
+    color: #125761;
+    margin-bottom: 12px;
+    font-size: 19px;
+}
+
+.feature-card p {
+    color: #58777c;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.quote-section {
+    background: #0e555c;
+    color: white;
+    text-align: center;
+    padding: 65px 20px;
+}
+
+.quote-section h2 {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.quote-section p {
+    font-size: 17px;
+    opacity: 0.9;
+}
+
+.footer {
+    background: #0b454b;
+    color: #ccebed;
+    text-align: center;
+    padding: 35px 20px;
+}
+
+.footer-logo {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.footer p {
+    font-size: 14px;
+}
+
+.login-container {
+    min-height: calc(100vh - 145px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 55px 20px;
+}
+
+.login-box {
+    width: 560px;
+    background: white;
+    border-radius: 18px;
+    padding: 45px 48px;
+    box-shadow: 0 10px 35px rgba(0, 70, 80, 0.12);
+}
+
+.login-icon {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: #e2f5f6;
+    color: #0b6872;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin-bottom: 20px;
+}
+
+.login-box h1 {
+    font-size: 34px;
+    color: #104f57;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: #638085;
+    font-size: 15px;
+    margin-bottom: 30px;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    color: #28565c;
+    margin-bottom: 8px;
+}
+
+.input-group input {
+    width: 100%;
+    height: 48px;
+    border: 1px solid #c8dfe1;
+    border-radius: 8px;
+    padding: 0 14px;
+    font-size: 15px;
+    outline: none;
+    color: #244f55;
+    background: white;
+}
+
+.input-group input:focus {
+    border-color: #0b7d87;
+    box-shadow: 0 0 0 3px rgba(11, 125, 135, 0.1);
+}
+
+.options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 5px 0 25px;
+    font-size: 14px;
+}
+
+.remember {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #557276;
+}
+
+.remember input {
+    width: 15px;
+    height: 15px;
+}
+
+.options a {
+    color: #08747e;
+    font-weight: 500;
+}
+
+.login-btn {
+    width: 100%;
+    height: 48px;
+    border: none;
+    border-radius: 8px;
+    background: #0b737c;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.login-btn:hover {
+    background: #07565e;
+}
+
+.signup {
+    text-align: center;
+    margin-top: 25px;
+    color: #61797d;
+    font-size: 14px;
+}
+
+.signup a {
+    color: #08747e;
+    font-weight: bold;
+}
+
+.back-home {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: #08747e;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.signup-container {
+    min-height: calc(100vh - 145px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 50px 20px;
+}
+
+.signup-box {
+    width: 560px;
+    background: white;
+    border-radius: 18px;
+    padding: 40px 48px;
+    box-shadow: 0 10px 35px rgba(0, 70, 80, 0.12);
+}
+
+.signup-icon {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: #e2f5f6;
+    color: #0b6872;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin-bottom: 18px;
+}
+
+.signup-box h1 {
+    font-size: 34px;
+    color: #104f57;
+    margin-bottom: 8px;
+}
+
+.signup-box .subtitle {
+    margin-bottom: 25px;
+}
+
+.signup-box .input-group {
+    margin-bottom: 17px;
+}
+
+.signup-btn {
+    width: 100%;
+    height: 48px;
+    border: none;
+    border-radius: 8px;
+    background: #0b737c;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+.signup-btn:hover {
+    background: #07565e;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 22px;
+    color: #61797d;
+    font-size: 14px;
+}
+
+.login-link a {
+    color: #08747e;
+    font-weight: bold;
+}
+
+.explore-hero {
+    background: linear-gradient(135deg, #dff7f7, #c4eded);
+    text-align: center;
+    padding: 65px 20px;
+}
+
+.explore-hero h1 {
+    font-size: 42px;
+    color: #104f57;
+    margin-bottom: 12px;
+}
+
+.explore-hero p {
+    color: #55777b;
+    font-size: 17px;
+}
+
+.destination-section {
+    padding: 65px 8%;
+    background: white;
+}
+
+.destination-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+}
+
+.destination-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0, 70, 80, 0.1);
+    transition: 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+.destination-card:hover {
+    transform: translateY(-6px);
+}
+
+.destination-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.destination-content {
+    padding: 18px 20px 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.destination-card h3 {
+    color: #124f57;
+    font-size: 21px;
+    margin-bottom: 8px;
+}
+
+.destination-card p {
+    color: #64777b;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 18px;
+    flex: 1;
+}
+
+.explore-btn {
+    display: inline-block;
+    background: #0b737c;
+    color: white !important;
+    padding: 10px 18px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 5px;
+    transition: 0.3s;
+}
+
+.explore-btn:hover {
+    background: #07565e;
+    transform: translateY(-2px);
+}
+
+.explore-section {
+    background: #0e555c;
+    color: white;
+    text-align: center;
+    padding: 55px 20px;
+}
+
+.explore-section h2 {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.explore-section p {
+    font-size: 17px;
+    opacity: 0.9;
+    margin-bottom: 25px;
+}
+
+.explore-main-btn {
+    display: inline-block;
+    background: white;
+    color: #0b6872;
+    padding: 13px 30px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.categories {
+    padding: 70px 8%;
+    background: #f4fbfb;
+}
+
+.section-subtitle {
+    text-align: center;
+    color: #58777c;
+    margin-top: -30px;
+    margin-bottom: 40px;
+    font-size: 16px;
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+}
+
+.category {
+    background: white;
+    padding: 35px 20px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0, 70, 80, 0.08);
+    transition: 0.3s;
+}
+
+.category:hover {
+    transform: translateY(-6px);
+}
+
+.category-icon {
+    font-size: 45px;
+    margin-bottom: 18px;
+}
+
+.category h3 {
+    color: #125761;
+    font-size: 20px;
+    margin-bottom: 12px;
+}
+
+.category p {
+    color: #58777c;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.explore-cta {
+    background: #0e555c;
+    color: white;
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.explore-cta h2 {
+    font-size: 30px;
+    margin-bottom: 12px;
+}
+
+.explore-cta p {
+    margin-bottom: 22px;
+    opacity: 0.9;
+}
+
+.cta-btn {
+    display: inline-block;
+    background: white;
+    color: #0b6872;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+@media (max-width: 900px) {
+    .features {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .destination-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .nav-links {
+        gap: 15px;
+    }
+
+    .navbar {
+        padding: 0 4%;
+    }
+}
+
+@media (max-width: 650px) {
+    .navbar {
+        height: auto;
+        padding: 18px 20px;
+    }
+
+    .nav-links {
+        display: none;
+    }
+
+    .hero h1 {
+        font-size: 34px;
+    }
+
+    .features {
+        grid-template-columns: 1fr;
+    }
+
+    .destination-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .login-box,
+    .signup-box {
+        width: 100%;
+        padding: 32px 25px;
+    }
+
+    .login-box h1,
+    .signup-box h1 {
+        font-size: 28px;
+    }
+}
+    /* SIGN UP PAGE */
+
+.signup-section {
+    min-height: 650px;
+    background: #eefafa;
+    padding: 50px 8%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.signup-container {
+    width: 100%;
+    max-width: 1100px;
+    min-height: 570px;
+    display: flex;
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.signup-image {
+    width: 45%;
+    background-image: linear-gradient(
+        rgba(7, 91, 98, 0.65),
+        rgba(7, 91, 98, 0.65)
+    ),
+    url("https://www.pngmagic.com/webp_images/free-high-resolution-nature-background-photos-download_8Qo.webp");
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    padding: 50px;
+    box-sizing: border-box;
+    color: white;
+}
+
+.signup-image h1 {
+    font-size: 38px;
+    line-height: 1.2;
+    color: white !important;
+    margin-bottom: 20px;
+}
+
+.signup-image p {
+    font-size: 17px;
+    line-height: 1.7;
+    color: white !important;
+}
+
+.signup-form {
+    width: 55%;
+    padding: 45px 50px;
+    box-sizing: border-box;
+    background: white;
+}
+
+.signup-form h2 {
+    color: #075b62 !important;
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.signup-form .intro {
+    color: #666 !important;
+    margin-bottom: 25px;
+}
+
+.form-row {
+    display: flex;
+    gap: 18px;
+}
+
+.form-row .form-group {
+    width: 50%;
+}
+
+.form-group {
+    margin-bottom: 17px;
+}
+
+.form-group label {
+    display: block;
+    color: #333 !important;
+    font-weight: 600;
+    margin-bottom: 7px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #ccc;
+    border-radius: 7px;
+    font-size: 15px;
+    box-sizing: border-box;
+    outline: none;
+    color: #333;
+    background: white;
+}
+
+.form-group input:focus {
+    border-color: #087f89;
+}
+
+.terms {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 15px 0 20px;
+    color: #555 !important;
+    font-size: 14px;
+}
+
+.terms input {
+    margin-top: 3px;
+}
+
+.signup-btn {
+    width: 100%;
+    padding: 14px;
+    background: #087f89;
+    color: white !important;
+    border: none;
+    border-radius: 7px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.signup-btn:hover {
+    background: #075b62;
+}
+
+.login-text {
+    text-align: center;
+    color: #555 !important;
+    margin-top: 20px;
+}
+
+.login-text a {
+    color: #087f89 !important;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.back-home {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+    color: #087f89 !important;
+    text-decoration: none;
+}
+
+.signup-section + footer {
+    background: #075b62;
+    color: white;
+    text-align: center;
+    padding: 25px;
+}
+
+.signup-section + footer h2 {
+    color: white !important;
+    margin-bottom: 5px;
+}
+
+.signup-section + footer p {
+    color: white !important;
+}
+
+@media (max-width: 800px) {
+    .signup-container {
+        flex-direction: column;
+    }
+
+    .signup-image,
+    .signup-form {
+        width: 100%;
+    }
+
+    .signup-image {
+        min-height: 250px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .form-row .form-group {
+        width: 100%;
+    }
+}
