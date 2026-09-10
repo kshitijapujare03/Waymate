@@ -1,10 +1,8 @@
-const loginForm = document.getElementById("loginForm");
-
-loginForm.addEventListener("submit", async function (event) {
+document.querySelector("#loginForm").addEventListener("submit", async function(event) {
     event.preventDefault();
 
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
+    const email = document.querySelector("#email").value.trim();
+    const password = document.querySelector("#password").value;
 
     try {
         const response = await fetch("http://127.0.0.1:5000/api/login", {
@@ -21,17 +19,18 @@ loginForm.addEventListener("submit", async function (event) {
         const data = await response.json();
 
         if (response.ok) {
-            localStorage.setItem("user", JSON.stringify(data.user));
-
             alert("Login successful!");
+
+            localStorage.setItem("user_id", data.user.id);
+            localStorage.setItem("user_name", data.user.full_name);
 
             window.location.href = "home.html";
         } else {
-            alert(data.message || "Invalid email or password");
+            alert(data.message || "Login failed.");
         }
 
     } catch (error) {
-        console.error(error);
-        alert("Cannot connect to server. Make sure Flask is running.");
+        console.error("Login error:", error);
+        alert("Cannot connect to the backend.");
     }
 });
