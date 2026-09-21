@@ -1,0 +1,506 @@
+/* =====================================================
+   WAYMATE - COMMON CSS
+   ===================================================== */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* =====================================================
+   HOME PAGE - NAVBAR
+   ===================================================== */
+
+.navbar {
+    height: 88px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8%;
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.logo {
+    font-size: 30px;
+    font-weight: bold;
+    color: #0d626b;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #164e56;
+    font-size: 17px;
+    font-weight: 500;
+}
+
+.nav-links a:hover {
+    color: #0d858f;
+}
+
+.profile {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: #e3f1f2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* =====================================================
+   HOME PAGE - HERO
+   ===================================================== */
+
+.home-hero {
+    min-height: 670px;
+
+    background-image:
+        linear-gradient(
+            rgba(5, 57, 65, 0.58),
+            rgba(5, 57, 65, 0.58)
+        ),
+        url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1800&q=85");
+
+    background-size: cover;
+    background-position: center;
+
+    display: flex;
+    align-items: center;
+    padding: 0 10%;
+}
+
+.hero-content {
+    max-width: 700px;
+    color: white;
+}
+
+.hero-content h1 {
+    font-size: 58px;
+    line-height: 1.2;
+    margin-bottom: 28px;
+}
+
+.hero-content p {
+    font-size: 23px;
+}
+
+
+/* =====================================================
+   HOME PAGE - DESTINATIONS
+   ===================================================== */
+
+.section {
+    padding: 70px 4%;
+    background: white;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 36px;
+    color: #105b64;
+    margin-bottom: 8px;
+}
+
+.section-subtitle {
+    text-align: center;
+    color: #557177;
+    font-size: 18px;
+    margin-bottom: 42px;
+}
+
+.destination-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 26px;
+    max-width: 1400px;
+    margin: auto;
+}
+
+.destination-card {
+    background: white;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.10);
+    transition: 0.3s;
+}
+
+.destination-card:hover {
+    transform: translateY(-7px);
+}
+
+.destination-card img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+}
+
+.destination-content {
+    padding: 22px;
+}
+
+.destination-content h3 {
+    font-size: 25px;
+    color: #105b64;
+    margin-bottom: 10px;
+}
+
+.destination-content p {
+    color: #5a6c70;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.explore-btn {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    background: #096c75;
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.explore-btn:hover {
+    background: #084f56;
+}
+
+
+/* =====================================================
+   HOME PAGE - EXPERIENCE
+   ===================================================== */
+
+.categories {
+    padding: 75px 5%;
+    background: #f4f9f9;
+}
+
+.category-grid {
+    max-width: 1200px;
+    margin: auto;
+
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 28px;
+}
+
+.category {
+    background: white;
+    border-radius: 18px;
+    padding: 35px 25px;
+    text-align: center;
+
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
+}
+
+.category:hover {
+    transform: translateY(-5px);
+}
+
+.category-icon {
+    font-size: 48px;
+    margin-bottom: 14px;
+}
+
+.category h3 {
+    color: #105b64;
+    font-size: 23px;
+    margin-bottom: 10px;
+}
+
+.category p {
+    color: #607277;
+}
+
+
+/* =====================================================
+   HOME PAGE - CTA + FOOTER
+   ===================================================== */
+
+.explore-section {
+    text-align: center;
+    padding: 75px 20px;
+    background: #0c5058;
+    color: white;
+}
+
+.explore-section h2 {
+    font-size: 38px;
+}
+
+.explore-section p {
+    font-size: 19px;
+    margin: 10px 0 25px;
+}
+
+.explore-main-btn {
+    display: inline-block;
+    text-decoration: none;
+    background: white;
+    color: #0c626b;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.footer {
+    background: #083d44;
+    color: white;
+    text-align: center;
+    padding: 28px;
+}
+
+.footer-logo {
+    font-size: 25px;
+    font-weight: bold;
+}
+
+
+/* =====================================================
+   INDEX PAGE - RECOMMENDATION SYSTEM
+   ===================================================== */
+
+.container {
+    min-height: 100vh;
+    padding: 55px 8% 70px;
+
+    background:
+        linear-gradient(
+            rgba(231, 246, 247, 0.94),
+            rgba(245, 250, 250, 0.97)
+        );
+
+    color: #164e56;
+}
+
+
+/* Main heading */
+
+.container > h1 {
+    text-align: center;
+    font-size: 48px;
+    color: #0b626b;
+    margin-bottom: 8px;
+}
+
+.container > p {
+    text-align: center;
+    font-size: 20px;
+    color: #557177;
+    margin-bottom: 35px;
+}
+
+
+/* Recommendation form */
+
+#travelForm {
+    max-width: 950px;
+    margin: auto;
+
+    background: white;
+    padding: 35px;
+
+    border-radius: 20px;
+
+    box-shadow:
+        0 10px 35px rgba(0, 80, 90, 0.12);
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 25px;
+}
+
+
+/* Labels */
+
+#travelForm label {
+    font-size: 15px;
+    font-weight: bold;
+    color: #145b63;
+
+    margin-top: 8px;
+}
+
+
+/* Inputs and dropdowns */
+
+#travelForm input,
+#travelForm select {
+    width: 100%;
+
+    padding: 13px 14px;
+
+    border: 1px solid #c9dfe1;
+    border-radius: 10px;
+
+    background: #f9fcfc;
+
+    font-size: 15px;
+    color: #244f54;
+
+    outline: none;
+
+    transition: 0.3s;
+}
+
+
+/* Focus effect */
+
+#travelForm input:focus,
+#travelForm select:focus {
+    border-color: #0c7b84;
+
+    box-shadow:
+        0 0 0 3px rgba(12, 123, 132, 0.10);
+}
+
+
+/* Recommendation button */
+
+#travelForm button {
+    grid-column: 1 / -1;
+
+    margin-top: 18px;
+
+    padding: 15px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #0b7079;
+    color: white;
+
+    font-size: 17px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+
+#travelForm button:hover {
+    background: #084f56;
+    transform: translateY(-2px);
+}
+
+
+/* =====================================================
+   INDEX PAGE - RESULT
+   ===================================================== */
+
+/* Recommendation Result Card */
+#result {
+    margin-top: 30px;
+    padding: 25px;
+    background: white;
+    border-radius: 18px;
+    border: 1px solid #d9eeee;
+    box-shadow: 0 8px 25px rgba(0, 128, 128, 0.12);
+    text-align: left;
+}
+
+#result h2 {
+    text-align: center;
+    color: #008080;
+    margin-bottom: 20px;
+}
+
+#result h3 {
+    text-align: center;
+    font-size: 28px;
+    color: #006666;
+    margin-bottom: 20px;
+}
+
+#result p {
+    margin: 12px 0;
+    padding: 10px 12px;
+    background: #f4fbfb;
+    border-radius: 8px;
+    color: #333;
+}
+
+#result strong {
+    color: #007777;
+}
+
+/* =====================================================
+   RESPONSIVE DESIGN
+   ===================================================== */
+
+@media (max-width: 900px) {
+
+    .destination-grid,
+    .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    #travelForm {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-content h1 {
+        font-size: 45px;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .navbar {
+        height: auto;
+        padding: 20px;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .nav-links {
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .destination-grid,
+    .category-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .home-hero {
+        min-height: 550px;
+        padding: 0 7%;
+    }
+
+    .hero-content h1 {
+        font-size: 36px;
+    }
+
+    .hero-content p {
+        font-size: 18px;
+    }
+
+    .container {
+        padding: 40px 5%;
+    }
+
+    .container > h1 {
+        font-size: 38px;
+    }
+
+    #travelForm {
+        padding: 22px;
+    }
+}
