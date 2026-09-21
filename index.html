@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WayMate - Travel Recommendation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>WayMate</h1>
+        <p>Find the perfect destination for your trip</p>
+
+        <form id="travelForm">
+
+            <label>Number of People</label>
+            <input type="number" id="people" min="1" placeholder="Enter number of people" required>
+
+            <label>Budget (₹)</label>
+            <input type="number" id="budget" min="1" placeholder="Enter your budget" required>
+
+            <label>Number of Days</label>
+            <input type="number" id="days" min="1" placeholder="Enter number of days" required>
+
+            <label>Destination</label>
+            <select id="destination">
+                <option value="not decided">Not Decided</option>
+                <option value="Goa">Goa</option>
+                <option value="Jaipur">Jaipur</option>
+                <option value="Kerala Backwaters">Kerala Backwaters</option>
+                <option value="Manali">Manali</option>
+                <option value="Agra">Agra</option>
+                <option value="Hampi">Hampi</option>
+                <option value="Amritsar">Amritsar</option>
+                <option value="Rishikesh">Rishikesh</option>
+                <option value="Ladakh">Ladakh</option>
+                <option value="Meghalaya">Meghalaya</option>
+            </select>
+<label>Location</label>
+<input type="text" id="location" placeholder="Enter city name">
+            <label>Weather Preference</label>
+            <select id="weather">
+                <option value="any">Any Weather</option>
+                <option value="sunny">Sunny</option>
+                <option value="cold">Cold</option>
+                <option value="rainy">Rainy</option>
+            </select>
+
+            <button type="submit">Get Recommendation</button>
+
+        </form>
+
+        <div id="result"></div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
