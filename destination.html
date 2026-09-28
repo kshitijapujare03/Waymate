@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Waymate - Destination</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="destination-page">
+
+        <nav class="navbar">
+
+            <div class="logo">
+                <span>Way</span>mate
+            </div>
+
+            <div class="nav-links">
+                <a href="home.html">Home</a>
+                <a href="explore.html">Explore</a>
+                <a href="plan.html">Plan My Trip</a>
+                <a href="trips.html">My Trips</a>
+                <a href="account.html">My Account</a>
+            </div>
+
+        </nav>
+
+
+        <main class="destination-container">
+
+            <a href="explore.html" class="back-button">
+                ← Back to Explore
+            </a>
+
+            <div id="destinationContent"></div>
+
+        </main>
+
+
+        <footer class="footer">
+
+            <p>
+                Your journey, our recommendation.
+            </p>
+
+        </footer>
+
+    </div>
+
+
+    <script>
+
+        const selectedDestination =
+            JSON.parse(localStorage.getItem("selectedDestination"));
+
+
+        const destinationDetails = {
+
+            "Goa": {
+                location: "Goa, India",
+
+                weather:
+                    "Warm and tropical. Summers are hot, while winters are pleasant.",
+
+                packing: [
+                    "Light cotton clothes",
+                    "Sunglasses",
+                    "Sunscreen",
+                    "Comfortable footwear",
+                    "Swimwear"
+                ],
+
+                spots: [
+                    "Baga Beach",
+                    "Calangute Beach",
+                    "Fort Aguada",
+                    "Basilica of Bom Jesus",
+                    "Dudhsagar Falls"
+                ]
+            },
+
+
+            "Jaipur": {
+                location: "Jaipur, Rajasthan, India",
+
+                weather:
+                    "Generally warm and dry. Winters are cooler and comfortable for sightseeing.",
+
+                packing: [
+                    "Light comfortable clothes",
+                    "Sunglasses",
+                    "Sunscreen",
+                    "Comfortable walking shoes",
+                    "Water bottle"
+                ],
+
+                spots: [
+                    "Amber Fort",
+                    "Hawa Mahal",
+                    "City Palace",
+                    "Jantar Mantar",
+                    "Nahargarh Fort"
+                ]
+            },
+
+
+            "Kerala Backwaters": {
+                location: "Kerala, India",
+
+                weather:
+                    "Tropical and humid with warm temperatures throughout most of the year.",
+
+                packing: [
+                    "Light cotton clothes",
+                    "Umbrella",
+                    "Sunscreen",
+                    "Mosquito repellent",
+                    "Comfortable footwear"
+                ],
+
+                spots: [
+                    "Alleppey Backwaters",
+                    "Kumarakom",
+                    "Vembanad Lake",
+                    "Houseboat Cruises",
+                    "Marari Beach"
+                ]
+            },
+
+
+            "Manali": {
+                location: "Himachal Pradesh, India",
+
+                weather:
+                    "Cool mountain climate. Winters are cold and summers are pleasant.",
+
+                packing: [
+                    "Warm clothes",
+                    "Jacket",
+                    "Comfortable shoes",
+                    "Sunglasses",
+                    "Moisturizer"
+                ],
+
+                spots: [
+                    "Solang Valley",
+                    "Rohtang Pass",
+                    "Hadimba Temple",
+                    "Mall Road",
+                    "Old Manali"
+                ]
+            },
+
+
+            "Agra": {
+                location: "Uttar Pradesh, India",
+
+                weather:
+                    "Hot summers and cooler winters. Winters are generally comfortable for sightseeing.",
+
+                packing: [
+                    "Comfortable clothes",
+                    "Sunglasses",
+                    "Sunscreen",
+                    "Comfortable walking shoes",
+                    "Water bottle"
+                ],
+
+                spots: [
+                    "Taj Mahal",
+                    "Agra Fort",
+                    "Mehtab Bagh",
+                    "Itmad-ud-Daulah's Tomb",
+                    "Fatehpur Sikri"
+                ]
+            },
+
+
+            "Hampi": {
+                location: "Karnataka, India",
+
+                weather:
+                    "Mostly warm and dry. Cooler months are more comfortable for exploring.",
+
+                packing: [
+                    "Light cotton clothes",
+                    "Comfortable walking shoes",
+                    "Sunglasses",
+                    "Sunscreen",
+                    "Water bottle"
+                ],
+
+                spots: [
+                    "Virupaksha Temple",
+                    "Vittala Temple",
+                    "Hampi Bazaar",
+                    "Lotus Mahal",
+                    "Matanga Hill"
+                ]
+            },
+
+
+            "Amritsar": {
+                location: "Punjab, India",
+
+                weather:
+                    "Hot summers and cold winters with pleasant weather during spring and autumn.",
+
+                packing: [
+                    "Comfortable clothes",
+                    "Comfortable footwear",
+                    "Sunglasses",
+                    "Sunscreen",
+                    "Light jacket for cooler months"
+                ],
+
+                spots: [
+                    "Golden Temple",
+                    "Jallianwala Bagh",
+                    "Wagah Border",
+                    "Partition Museum",
+                    "Gobindgarh Fort"
+                ]
+            },
+
+
+            "Rishikesh": {
+                location: "Uttarakhand, India",
+
+                weather:
+                    "Generally warm with pleasant winters. Monsoon brings heavy rainfall.",
+
+                packing: [
+                    "Comfortable clothes",
+                    "Sports shoes",
+                    "Sunscreen",
+                    "Water bottle",
+                    "Light jacket"
+                ],
+
+                spots: [
+                    "Laxman Jhula",
+                    "Triveni Ghat",
+                    "River Rafting",
+                    "Neer Garh Waterfall",
+                    "Beatles Ashram"
+                ]
+            },
+
+
+            "Ladakh": {
+                location: "Ladakh, India",
+
+                weather:
+                    "Cold and dry mountain climate with strong temperature changes between day and night.",
+
+                packing: [
+                    "Warm layered clothes",
+                    "Jacket",
+                    "Sunglasses",
+                    "Sunscreen",
+                    "Comfortable shoes"
+                ],
+
+                spots: [
+                    "Pangong Lake",
+                    "Nubra Valley",
+                    "Leh Palace",
+                    "Magnetic Hill",
+                    "Khardung La"
+                ]
+            },
+
+
+            "Meghalaya": {
+                location: "Meghalaya, India",
+
+                weather:
+                    "Cool and pleasant in many areas with frequent rainfall, especially during monsoon.",
+
+                packing: [
+                    "Light layers",
+                    "Rain jacket",
+                    "Waterproof footwear",
+                    "Umbrella",
+                    "Mosquito repellent"
+                ],
+
+                spots: [
+                    "Living Root Bridges",
+                    "Cherrapunji",
+                    "Shillong",
+                    "Dawki",
+                    "Mawsmai Cave"
+                ]
+            }
+
+        };
+
+
+        function showDestination() {
+
+            const container =
+                document.getElementById("destinationContent");
+
+
+            if (!selectedDestination) {
+
+                container.innerHTML = `
+                    <div class="not-found">
+                        <h2>Destination not found</h2>
+                        <p>
+                            Please go back to Explore and select a destination.
+                        </p>
+                    </div>
+                `;
+
+                return;
+            }
+
+
+            const details =
+                destinationDetails[selectedDestination.name];
+
+
+            if (!details) {
+
+                container.innerHTML = `
+                    <div class="not-found">
+                        <h2>Destination details unavailable</h2>
+                        <p>
+                            Please go back to Explore and select another destination.
+                        </p>
+                    </div>
+                `;
+
+                return;
+            }
+
+              const destinationImages = {
+    "Meghalaya": "https://t4.ftcdn.net/jpg/02/91/30/71/360_F_291307182_VbdoNkRulG9XkGgDQkwKUIdR4GcuLtXg.jpg",
+
+    "Goa": "https://www.goatourismhotels.com/img/north-goa-sightseeing-8.jpg",
+
+    "Jaipur": "https://static.vecteezy.com/system/resources/thumbnails/042/560/373/small/amer-amber-fort-rajasthan-india-photo.jpg",
+
+    "Kerala Backwaters": "https://t3.ftcdn.net/jpg/09/46/17/06/360_F_946170699_pspnWARcAaQv9ucK7NAdNZ9whmUwGcA2.jpg",
+
+    "Manali": "https://wallpaperaccess.com/full/2185184.jpg",
+
+    "Agra": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSty8TwBsTy1y7rhBDAiIflVsttO-jemLqAb1wrhzfajA&s=10",
+
+    "Hampi": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmrNHyqqCryhoyNW2chw_uGomY0ZURf6_9GoqMCwTQzWHffLwJbvwuCuY&s=10",
+
+    "Rishikesh": "https://www.sterlingholidays.com/blog/wp-content/uploads/2025/12/niloy-banerjee-w2uhp5VrF8M-unsplash-scaled.jpg",
+
+    "Amritsar": "https://www.tourmyindia.com/states/punjab/images/tour-banner.jpg",
+
+    "Ladakh": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLQVD1FSbihO8skBvxlhRZdUM5-_RaJXOkFHPLzlCIpn1K3N5tijJGJnB4&s=10"
+};
+
+const destinationImage =
+    destinationImages[selectedDestination.name] ||
+    selectedDestination.image;
+
+container.innerHTML = `
+
+                <section class="destination-hero">
+
+                    
+                        <img
+                         src="${destinationImage}"
+                        alt="${selectedDestination.name}"
+                        >
+
+                    <div class="destination-main-info">
+
+                        <h1>
+                            ${selectedDestination.name}
+                        </h1>
+
+                        <div class="destination-location">
+                            📍 ${details.location}
+                        </div>
+
+                        <div class="destination-type">
+                            ${selectedDestination.type}
+                        </div>
+
+                        <p class="destination-description">
+                            ${selectedDestination.description}
+                        </p>
+
+                        <div class="destination-buttons">
+
+                            <button
+                                class="save-button"
+                                id="saveButton"
+                                onclick="toggleSave()"
+                            >
+                                ♡ Save Destination
+                            </button>
+
+                        </div>
+
+                    
+
+                </section>
+
+
+                <section class="details-grid">
+
+                    <div class="detail-box">
+
+                        <h3>💰 Budget</h3>
+
+                        <p>
+                            Approximately ₹${selectedDestination.budget.toLocaleString("en-IN")}
+                        </p>
+
+                    </div>
+
+
+                    <div class="detail-box">
+
+                        <h3>📅 Recommended Duration</h3>
+
+                        <p>
+                            ${selectedDestination.days} days
+                        </p>
+
+                    </div>
+
+
+                    <div class="detail-box">
+
+                        <h3>☀️ Weather</h3>
+
+                        <p>
+                            ${details.weather}
+                        </p>
+
+                    </div>
+
+
+                    <div class="detail-box">
+
+                        <h3>⭐ Rating</h3>
+
+                        <p>
+                            ${selectedDestination.rating} / 5
+                        </p>
+
+                    </div>
+
+
+                    <div class="detail-box">
+
+                        <h3>🎒 Packing Essentials</h3>
+
+                        <ul class="info-list">
+
+                            ${details.packing.map(item => `
+                                <li>${item}</li>
+                            `).join("")}
+
+                        </ul>
+
+                    </div>
+
+
+                    <div class="detail-box">
+
+                        <h3>📍 Location</h3>
+
+                        <p>
+                            ${details.location}
+                        </p>
+
+                    </div>
+
+                </section>
+
+
+                <section class="famous-spots">
+
+                    <h2>
+                        Famous Spots
+                    </h2>
+
+                    <ul>
+
+                        ${details.spots.map(spot => `
+                            <li>${spot}</li>
+                        `).join("")}
+
+                    </ul>
+
+                </section>
+
+            `;
+
+
+            updateSaveButton();
+
+        }
+
+
+        function toggleSave() {
+
+            if (!selectedDestination) {
+                return;
+            }
+
+
+            let savedDestinations =
+                JSON.parse(
+                    localStorage.getItem("savedDestinations")
+                ) || [];
+
+
+            const alreadySaved =
+                savedDestinations.some(
+                    destination =>
+                        destination.name ===
+                        selectedDestination.name
+                );
+
+
+            if (alreadySaved) {
+
+                savedDestinations =
+                    savedDestinations.filter(
+                        destination =>
+                            destination.name !==
+                            selectedDestination.name
+                    );
+
+            } else {
+
+                savedDestinations.push(
+                    selectedDestination
+                );
+
+            }
+
+
+            localStorage.setItem(
+                "savedDestinations",
+                JSON.stringify(savedDestinations)
+            );
+
+
+            updateSaveButton();
+
+        }
+
+
+        function updateSaveButton() {
+
+            const button =
+                document.getElementById("saveButton");
+
+
+            if (!button) {
+                return;
+            }
+
+
+            const savedDestinations =
+                JSON.parse(
+                    localStorage.getItem("savedDestinations")
+                ) || [];
+
+
+            const isSaved =
+                savedDestinations.some(
+                    destination =>
+                        destination.name ===
+                        selectedDestination.name
+                );
+
+
+            if (isSaved) {
+
+                button.innerHTML =
+                    "✓ Saved";
+
+                button.classList.add("saved");
+
+            } else {
+
+                button.innerHTML =
+                    "♡ Save Destination";
+
+                button.classList.remove("saved");
+
+            }
+
+        }
+
+
+        showDestination();
+
+    </script>
+
+</body>
+
+</html>
