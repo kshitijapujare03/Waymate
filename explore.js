@@ -1,320 +1,924 @@
-const destinations = [
-    {
-        name: "Goa",
-        type: "Beach",
-        description: "Famous beaches, water activities and vibrant nightlife",
-        budget: 5000,
-        days: 3,
-        rating: 4.5,
-        image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80"
-    },
+const API_URL = "http://127.0.0.1:5000";
 
-    {
-        name: "Jaipur",
-        type: "Historical & Cultural",
-        description: "Forts, palaces, markets and rich Rajasthani culture",
-        budget: 4500,
-        days: 3,
-        rating: 4.4,
-        image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80"
-    },
-
-    {
-        name: "Kerala Backwaters",
-        type: "Nature",
-        description: "Peaceful backwaters, houseboats and beautiful natural scenery",
-        budget: 6000,
-        days: 3,
-        rating: 4.6,
-        image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=800&q=80"
-    },
-
-    {
-        name: "Manali",
-        type: "Hill Station",
-        description: "Mountains, valleys, scenic views and adventure activities",
-        budget: 6000,
-        days: 4,
-        rating: 4.5,
-        image: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=800&q=80"
-    },
-
-    {
-        name: "Agra",
-        type: "Historical",
-        description: "Famous for the Taj Mahal and Mughal architecture",
-        budget: 3500,
-        days: 2,
-        rating: 4.5,
-        image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=800&q=80"
-    },
-
-    {
-        name: "Hampi",
-        type: "Historical",
-        description: "Ancient ruins, temples and unique landscapes",
-        budget: 4000,
-        days: 2,
-        rating: 4.6,
-        image: "https://images.unsplash.com/photo-1600100397608-f0102f7a6f9d?auto=format&fit=crop&w=800&q=80"
-    },
-
-    {
-        name: "Amritsar",
-        type: "Religious & Historical",
-        description: "Golden Temple, Jallianwala Bagh and Punjabi culture",
-        budget: 4000,
-        days: 2,
-        rating: 4.7,
-        image: "https://images.unsplash.com/photo-1609947017136-9daf32a5eb16?auto=format&fit=crop&w=800&q=80"
-    },
-
-    {
-        name: "Rishikesh",
-        type: "Adventure & Spiritual",
-        description: "River rafting, yoga, temples and mountain views",
-        budget: 4500,
-        days: 3,
-        rating: 4.5,
-        image: "https://images.unsplash.com/photo-1597074866923-dc0589150358?auto=format&fit=crop&w=800&q=80"
-    },
-
-    {
-        name: "Ladakh",
-        type: "Adventure & Nature",
-        description: "High-altitude landscapes, monasteries and mountain passes",
-        budget: 10000,
-        days: 5,
-        rating: 4.7,
-        image: "https://images.unsplash.com/photo-1518002054494-3a6f94352e9d?auto=format&fit=crop&w=800&q=80"
-    },
-
-    {
-        name: "Meghalaya",
-        type: "Nature",
-        description: "Waterfalls, caves, forests and living root bridges",
-        budget: 7000,
-        days: 4,
-        rating: 4.6,
-        image: "https://images.unsplash.com/photo-1622308644420-b20142dc993c?auto=format&fit=crop&w=800&q=80"
-    }
-];
-
+let destinations = [];
 
 let currentPage = 1;
-const cardsPerPage = 6;
-let filteredDestinations = [...destinations];
 
+const cardsPerPage = 6;
+
+
+// ==================================================
+// DEFAULT RECOMMENDED DAYS
+// ==================================================
+
+const DEFAULT_DAYS = {
+    "Goa": 3,
+    "Manali": 4,
+    "Jaipur": 3,
+    "Kerala Backwaters": 4,
+    "Agra": 2,
+    "Hampi": 3,
+    "Amritsar": 2,
+    "Rishikesh": 3,
+    "Ladakh": 5,
+    "Meghalaya": 4
+};
+
+
+// ==================================================
+// IMAGE OVERRIDES
+// ==================================================
+
+const IMAGE_OVERRIDES = {
+    "Manali":
+        "https://www.sostravelhouse.com/public/uploads/images/post/67fe2ee9cc351.webp",
+
+    "Hampi":
+        "https://commons.wikimedia.org/wiki/Special:Redirect/file/Hampi_virupaksha_temple.jpg"
+};
+
+
+// ==================================================
+// GET RECOMMENDED DAYS
+// ==================================================
+
+function getRecommendedDays(destination) {
+
+    const apiDays = Number(
+        destination.recommended_days ??
+        destination.days ??
+        destination.duration ??
+        destination.number_of_days ??
+        0
+    );
+
+    return apiDays > 0
+        ? apiDays
+        : (DEFAULT_DAYS[destination.name] || 0);
+}
+
+
+// ==================================================
+// FILTERED DESTINATIONS
+// ==================================================
+
+let filteredDestinations = [];
+
+
+// ==================================================
+// LOAD DESTINATIONS FROM BACKEND
+// ==================================================
+
+async function loadDestinations() {
+
+    try {
+
+        const response = await fetch(
+            `${API_URL}/api/destinations`
+        );
+
+        if (!response.ok) {
+
+            throw new Error(
+                `Server returned ${response.status}`
+            );
+
+        }
+
+        const result = await response.json();
+
+
+        // Flask API can return:
+        // [ ... ]
+        // OR
+        // { destinations: [ ... ] }
+        // OR
+        // { data: [ ... ] }
+
+        const apiData =
+            Array.isArray(result)
+                ? result
+                : (
+                    result.destinations ||
+                    result.data ||
+                    []
+                );
+
+
+        // ==================================================
+        // CONVERT BACKEND DATA
+        // ==================================================
+
+        destinations = apiData.map(
+            function(destination) {
+
+                return {
+
+                    id:
+                        destination.id ??
+                        destination.destination_id,
+
+
+                    name:
+                        destination.name ??
+                        destination.destination_name ??
+                        "",
+
+
+                    type:
+                        destination.destination_type ??
+                        destination.type ??
+                        "",
+
+
+                    description:
+                        destination.description ??
+                        "",
+
+
+                    // Use budget_min from backend
+                    budget:
+                        Number(
+                            destination.budget_min ??
+                            destination.budget ??
+                            destination.price ??
+                            0
+                        ),
+
+
+                    budget_min:
+                        Number(
+                            destination.budget_min ??
+                            0
+                        ),
+
+
+                    budget_max:
+                        Number(
+                            destination.budget_max ??
+                            0
+                        ),
+
+
+                    // IMPORTANT:
+                    // Use recommended days function
+                    days:
+                        getRecommendedDays(
+                            destination
+                        ),
+
+
+                    rating:
+                        Number(
+                            destination.rating ??
+                            0
+                        ),
+
+
+                    // IMPORTANT:
+                    // First use image override,
+                    // then backend image
+                    image:
+                        IMAGE_OVERRIDES[
+                            destination.name
+                        ] ||
+                        destination.image_url ||
+                        destination.image ||
+                        destination.imageUrl ||
+                        ""
+
+                };
+
+            }
+        );
+
+
+        // ==================================================
+        // INITIAL DESTINATION LIST
+        // ==================================================
+
+        filteredDestinations =
+            [...destinations];
+
+
+        currentPage = 1;
+
+
+        displayDestinations();
+
+
+        console.log(
+            "Destinations loaded from backend:",
+            destinations
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Error loading destinations:",
+            error
+        );
+
+
+        const grid =
+            document.getElementById(
+                "destinationGrid"
+            );
+
+
+        if (grid) {
+
+            grid.innerHTML = `
+                <p style="
+                    text-align:center;
+                    width:100%;
+                    padding:30px;
+                ">
+                    Unable to load destinations.
+                    Please make sure the backend is running.
+                </p>
+            `;
+
+        }
+
+    }
+
+}
+
+
+// ==================================================
+// DISPLAY DESTINATIONS
+// ==================================================
 
 function displayDestinations() {
 
-    const grid = document.getElementById("destinationGrid");
-    const noResults = document.getElementById("noResults");
+    const grid =
+        document.getElementById(
+            "destinationGrid"
+        );
 
-    grid.innerHTML = "";
 
-    const start = (currentPage - 1) * cardsPerPage;
-    const end = start + cardsPerPage;
+    const noResults =
+        document.getElementById(
+            "noResults"
+        );
 
-    const currentDestinations =
-        filteredDestinations.slice(start, end);
 
-    if (currentDestinations.length === 0) {
-        noResults.style.display = "block";
-        document.getElementById("pagination").innerHTML = "";
+    if (!grid) {
+
+        console.error(
+            "destinationGrid not found in HTML"
+        );
+
         return;
+
     }
 
-    noResults.style.display = "none";
 
-    currentDestinations.forEach(destination => {
+    // Clear old cards
+    grid.innerHTML = "";
 
-        const card = document.createElement("div");
 
-        card.className = "explore-destination-card";
+    const startIndex =
+        (currentPage - 1) *
+        cardsPerPage;
 
-        card.innerHTML = `
-            <img src="${destination.image}" alt="${destination.name}">
 
-            <div class="destination-card-content">
+    const endIndex =
+        startIndex +
+        cardsPerPage;
 
-                <h3>${destination.name}</h3>
 
-                <p class="destination-type">
-                    ${destination.type}
-                </p>
+    const pageDestinations =
+        filteredDestinations.slice(
+            startIndex,
+            endIndex
+        );
 
-                <p class="destination-description">
-                    ${destination.description}
-                </p>
 
-                <div class="destination-info-row">
+    // ==================================================
+    // NO RESULTS
+    // ==================================================
 
-                    <span>
-                        ₹${destination.budget.toLocaleString("en-IN")}
-                    </span>
+    if (
+        pageDestinations.length === 0
+    ) {
 
-                    <span>
-                        ⭐ ${destination.rating}
-                    </span>
+        if (noResults) {
+
+            noResults.style.display =
+                "block";
+
+        }
+
+        displayPagination();
+
+        return;
+
+    }
+
+
+    if (noResults) {
+
+        noResults.style.display =
+            "none";
+
+    }
+
+
+    // ==================================================
+    // CREATE DESTINATION CARDS
+    // ==================================================
+
+    pageDestinations.forEach(
+        function(destination) {
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+
+            card.className =
+                "destination-card";
+
+
+            card.innerHTML = `
+
+                <img
+                    src="${destination.image}"
+                    alt="${destination.name}"
+                    onerror="this.style.display='none';"
+                >
+
+                <div class="destination-card-content">
+
+                    <h3>
+                        ${destination.name}
+                    </h3>
+
+                    <p class="destination-type">
+                        ${destination.type}
+                    </p>
+
+                    <p class="destination-description">
+                        ${destination.description}
+                    </p>
+
+                    <div class="destination-info-row">
+
+                        <span>
+                            ₹${destination.budget.toLocaleString("en-IN")}
+                        </span>
+
+                        <span>
+                            ⭐ ${destination.rating}
+                        </span>
+
+                    </div>
+
+                    <p class="destination-days">
+                        ${destination.days} days recommended
+                    </p>
 
                 </div>
 
-                <p class="destination-days">
-                    ${destination.days} days recommended
-                </p>
+            `;
 
-            </div>
-        `;
 
-        card.addEventListener("click", function() {
+            // ==================================================
+            // DESTINATION CLICK
+            // ==================================================
 
-            localStorage.setItem(
-                "selectedDestination",
-                JSON.stringify(destination)
+            card.addEventListener(
+                "click",
+                async function() {
+
+
+                    // ------------------------------------------
+                    // SAVE SELECTED DESTINATION
+                    // ------------------------------------------
+
+                    localStorage.setItem(
+                        "selectedDestination",
+                        JSON.stringify(
+                            destination
+                        )
+                    );
+
+
+                    // Remember that destination
+                    // was opened from Explore
+
+                    localStorage.setItem(
+                        "destinationSource",
+                        "explore"
+                    );
+
+
+                    // ------------------------------------------
+                    // RECORD INTERACTION
+                    // ------------------------------------------
+
+                    if (destination.id) {
+
+                        try {
+
+                            const response =
+                                await fetch(
+                                    `${API_URL}/api/destinations/${destination.id}/interaction`,
+                                    {
+                                        method: "POST",
+
+                                        headers: {
+                                            "Content-Type":
+                                                "application/json"
+                                        },
+
+                                        body:
+                                            JSON.stringify({
+                                                interaction_type:
+                                                    "click"
+                                            })
+                                    }
+                                );
+
+
+                            const result =
+                                await response.json();
+
+
+                            console.log(
+                                "RAW BACKEND DATA:",
+                                result
+                            );
+
+
+                            console.log(
+                                "Interaction recorded:",
+                                result
+                            );
+
+                        }
+
+                        catch (error) {
+
+                            console.error(
+                                "Interaction error:",
+                                error
+                            );
+
+                        }
+
+                    }
+
+
+                    // ------------------------------------------
+                    // OPEN DESTINATION PAGE
+                    // ------------------------------------------
+
+                    window.location.href =
+                        "destination.html";
+
+                }
             );
 
-            window.location.href = "destination.html";
 
-        });
+            grid.appendChild(
+                card
+            );
 
-        grid.appendChild(card);
-    });
+        }
+    );
+
 
     displayPagination();
+
 }
 
+
+// ==================================================
+// PAGINATION
+// ==================================================
 
 function displayPagination() {
 
     const pagination =
-        document.getElementById("pagination");
+        document.getElementById(
+            "pagination"
+        );
+
+
+    if (!pagination) {
+
+        return;
+
+    }
+
 
     pagination.innerHTML = "";
 
+
     const totalPages =
-        Math.ceil(filteredDestinations.length / cardsPerPage);
+        Math.ceil(
+            filteredDestinations.length /
+            cardsPerPage
+        );
+
 
     if (totalPages <= 1) {
+
         return;
+
     }
 
-    for (let i = 1; i <= totalPages; i++) {
+
+    // ==================================================
+    // PAGE NUMBERS
+    // ==================================================
+
+    for (
+        let i = 1;
+        i <= totalPages;
+        i++
+    ) {
 
         const button =
-            document.createElement("button");
+            document.createElement(
+                "button"
+            );
 
-        button.textContent = i;
+
+        button.textContent =
+            i;
+
 
         if (i === currentPage) {
-            button.classList.add("active-page");
+
+            button.classList.add(
+                "active-page"
+            );
+
         }
 
-        button.onclick = function() {
 
-            currentPage = i;
-            displayDestinations();
+        button.onclick =
+            function() {
 
-        };
+                currentPage =
+                    i;
 
-        pagination.appendChild(button);
+
+                displayDestinations();
+
+
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+
+            };
+
+
+        pagination.appendChild(
+            button
+        );
+
     }
+
+
+    // ==================================================
+    // NEXT BUTTON
+    // ==================================================
+
+    if (
+        currentPage < totalPages
+    ) {
+
+        const nextButton =
+            document.createElement(
+                "button"
+            );
+
+
+        nextButton.textContent =
+            "›";
+
+
+        nextButton.onclick =
+            function() {
+
+                currentPage++;
+
+
+                displayDestinations();
+
+
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+
+            };
+
+
+        pagination.appendChild(
+            nextButton
+        );
+
+    }
+
 }
 
+
+// ==================================================
+// SEARCH
+// ==================================================
+
+function searchDestinations() {
+
+    applyFilters();
+
+}
+
+
+// ==================================================
+// FILTERS
+// ==================================================
 
 function applyFilters() {
 
+    const searchElement =
+        document.getElementById(
+            "searchInput"
+        );
+
+
+    const typeElement =
+        document.getElementById(
+            "typeFilter"
+        );
+
+
+    const budgetElement =
+        document.getElementById(
+            "budgetFilter"
+        );
+
+
+    const durationElement =
+        document.getElementById(
+            "durationFilter"
+        );
+
+
+    const sortElement =
+        document.getElementById(
+            "sortFilter"
+        );
+
+
     const searchValue =
-        document.getElementById("searchInput")
-        .value
-        .toLowerCase()
-        .trim();
+        searchElement
+            ? searchElement.value
+                .toLowerCase()
+                .trim()
+            : "";
+
 
     const selectedType =
-        document.getElementById("typeFilter").value;
+        typeElement
+            ? typeElement.value
+            : "all";
+
 
     const selectedBudget =
-        document.getElementById("budgetFilter").value;
+        budgetElement
+            ? budgetElement.value
+            : "all";
+
 
     const selectedDuration =
-        document.getElementById("durationFilter").value;
+        durationElement
+            ? durationElement.value
+            : "all";
+
 
     const selectedSort =
-        document.getElementById("sortFilter").value;
+        sortElement
+            ? sortElement.value
+            : "default";
 
 
-    filteredDestinations = destinations.filter(destination => {
+    // ==================================================
+    // FILTER DESTINATIONS
+    // ==================================================
 
-        const matchesSearch =
-            destination.name
-            .toLowerCase()
-            .includes(searchValue);
+    filteredDestinations =
+        destinations.filter(
+            function(destination) {
 
-        const matchesType =
-            selectedType === "all" ||
-            destination.type === selectedType;
 
-        const matchesBudget =
-            selectedBudget === "all" ||
-            destination.budget <= Number(selectedBudget);
+                // ------------------------------------------
+                // SEARCH
+                // ------------------------------------------
 
-        const matchesDuration =
-            selectedDuration === "all" ||
-            destination.days === Number(selectedDuration);
+                const matchesSearch =
+                    destination.name
+                        .toLowerCase()
+                        .includes(
+                            searchValue
+                        );
 
-        return (
-            matchesSearch &&
-            matchesType &&
-            matchesBudget &&
-            matchesDuration
+
+                // ------------------------------------------
+                // TYPE
+                // ------------------------------------------
+
+                const matchesType =
+                    selectedType === "all" ||
+                    String(destination.type || "")
+                        .trim()
+                        .toLowerCase() ===
+                    String(selectedType || "")
+                        .trim()
+                        .toLowerCase();
+
+
+                // ------------------------------------------
+                // BUDGET
+                // ------------------------------------------
+
+                const matchesBudget =
+                    selectedBudget === "all" ||
+                    destination.budget <=
+                        Number(
+                            selectedBudget
+                        );
+
+
+                // ------------------------------------------
+                // DURATION
+                // ------------------------------------------
+
+                const matchesDuration =
+                    selectedDuration === "all" ||
+                    Number(destination.days) ===
+                        Number(selectedDuration);
+
+
+                return (
+                    matchesSearch &&
+                    matchesType &&
+                    matchesBudget &&
+                    matchesDuration
+                );
+
+            }
         );
-    });
 
 
-    if (selectedSort === "priceLow") {
+    // ==================================================
+    // SORTING
+    // ==================================================
+
+    if (
+        selectedSort === "priceLow"
+    ) {
 
         filteredDestinations.sort(
-            (a, b) => a.budget - b.budget
+            function(a, b) {
+
+                return (
+                    a.budget -
+                    b.budget
+                );
+
+            }
         );
 
     }
 
-    if (selectedSort === "priceHigh") {
+
+    if (
+        selectedSort === "priceHigh"
+    ) {
 
         filteredDestinations.sort(
-            (a, b) => b.budget - a.budget
+            function(a, b) {
+
+                return (
+                    b.budget -
+                    a.budget
+                );
+
+            }
         );
 
     }
 
-    if (selectedSort === "ratingHigh") {
+
+    if (
+        selectedSort === "ratingHigh"
+    ) {
 
         filteredDestinations.sort(
-            (a, b) => b.rating - a.rating
+            function(a, b) {
+
+                return (
+                    b.rating -
+                    a.rating
+                );
+
+            }
         );
 
     }
+
+
+    // ==================================================
+    // GO BACK TO PAGE 1
+    // ==================================================
 
     currentPage = 1;
 
+
     displayDestinations();
+
 }
 
 
-function searchDestinations() {
-    applyFilters();
-}
+// ==================================================
+// PAGE LOAD
+// ==================================================
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
 
 
-document
-    .getElementById("searchInput")
-    .addEventListener("keydown", function(event) {
+        // ------------------------------------------
+        // SEARCH ENTER KEY
+        // ------------------------------------------
 
-        if (event.key === "Enter") {
-            searchDestinations();
+        const searchInput =
+            document.getElementById(
+                "searchInput"
+            );
+
+
+        if (searchInput) {
+
+            searchInput.addEventListener(
+                "keydown",
+                function(event) {
+
+                    if (
+                        event.key === "Enter"
+                    ) {
+
+                        searchDestinations();
+
+                    }
+
+                }
+            );
+
         }
 
-    });
+
+        // ------------------------------------------
+        // BACK TO EXPLORE BUTTON
+        // ------------------------------------------
+
+        const backToExplore =
+            document.getElementById(
+                "backToExplore"
+            );
 
 
-displayDestinations();
+        if (backToExplore) {
+
+            backToExplore.addEventListener(
+                "click",
+                function() {
+
+                    window.location.href =
+                        "explore.html";
+
+                }
+            );
+
+        }
+
+
+        // ------------------------------------------
+        // LOAD DESTINATIONS
+        // ------------------------------------------
+
+        loadDestinations();
+
+    }
+);

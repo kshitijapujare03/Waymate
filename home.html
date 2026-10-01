@@ -183,58 +183,7 @@
     <p>© 2026 Waymate. Your Smart Tourism Companion.</p>
 
 </footer>
-<script>
-
-const homeDestinations = {
-    "Goa": {
-        name: "Goa",
-        type: "Beach",
-        description: "Famous beaches, water activities and vibrant nightlife",
-        budget: 5000,
-        days: 3,
-        rating: 4.5,
-        image: "https://hblimg.mmtcdn.com/content/hubble/img/goakolkatadestimages/mmt/activities/t_trp/m_Goa_3_l_666_1000.jpg?im=Resize=(750,399)"
-    },
-
-    "Manali": {
-        name: "Manali",
-        type: "Hill Station",
-        description: "Mountains, valleys, scenic views and adventure activities",
-        budget: 6000,
-        days: 4,
-        rating: 4.5,
-        image: "https://www.sostravelhouse.com/public/uploads/images/post/67fe2ee9cc351.webp"
-    },
-
-    "Jaipur": {
-        name: "Jaipur",
-        type: "Historical & Cultural",
-        description: "Forts, palaces, markets and rich Rajasthani culture",
-        budget: 4500,
-        days: 3,
-        rating: 4.4,
-        image: "https://www.peakadventuretour.com/assets/imgs/jaipur-tourism-01.webp"
-    },
-
-    "Kerala Backwaters": {
-        name: "Kerala Backwaters",
-        type: "Nature",
-        description: "Peaceful backwaters, houseboats and beautiful natural scenery",
-        budget: 6000,
-        days: 3,
-        rating: 4.6,
-        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTd_IYNI0qwEaB5DqSZGAo6hPAe2_rahg11rSO32zTtRoI7HFxtsd90Ni0&s=10"
-    }
-};
-
-function selectHomeDestination(name) {
-    localStorage.setItem(
-        "selectedDestination",
-        JSON.stringify(homeDestinations[name])
-    );
-}
-
-</script>
+<script src="home.js"></script>
 
 </body>
 </html>

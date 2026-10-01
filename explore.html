@@ -265,6 +265,10 @@
 
             <div class="explore-heading">
 
+                <button id="backToExplore" style="display: none;">
+    ← Back
+</button>
+
                 <h1>Explore Destinations</h1>
 
                 <p>
@@ -293,46 +297,37 @@
             <!-- FILTERS -->
             <div class="filters">
 
-                <select id="typeFilter" onchange="applyFilters()">
+               <select id="typeFilter" onchange="applyFilters()">
 
-                    <option value="all">
-                        All Types
-                    </option>
+    <option value="all">
+        All Types
+    </option>
 
-                    <option value="Beach">
-                        Beach
-                    </option>
+    <option value="Beach">
+        Beach
+    </option>
 
-                    <option value="Historical & Cultural">
-                        Historical & Cultural
-                    </option>
+    <option value="Mountain">
+        Mountain
+    </option>
 
-                    <option value="Nature">
-                        Nature
-                    </option>
+    <option value="Heritage">
+        Heritage
+    </option>
 
-                    <option value="Hill Station">
-                        Hill Station
-                    </option>
+    <option value="Nature">
+        Nature
+    </option>
 
-                    <option value="Historical">
-                        Historical
-                    </option>
+    <option value="Religious">
+        Religious
+    </option>
 
-                    <option value="Religious & Historical">
-                        Religious & Historical
-                    </option>
+    <option value="Adventure">
+        Adventure
+    </option>
 
-                    <option value="Adventure & Spiritual">
-                        Adventure & Spiritual
-                    </option>
-
-                    <option value="Adventure & Nature">
-                        Adventure & Nature
-                    </option>
-
-                </select>
-
+</select>
 
                 <select id="budgetFilter" onchange="applyFilters()">
 
@@ -444,437 +439,9 @@
         </footer>
 
     </div>
-
-
-    <script>
-
-        const destinations = [
-
-            {
-                name: "Goa",
-                type: "Beach",
-                description: "Famous beaches, water activities and vibrant nightlife",
-                budget: 5000,
-                days: 3,
-                rating: 4.5,
-                image: "https://c.ndtvimg.com/2026-03/pujl6v7o_travel_295x200_23_March_26.jpg"
-            },
-
-            {
-                name: "Jaipur",
-                type: "Historical & Cultural",
-                description: "Forts, palaces, markets and rich Rajasthani culture",
-                budget: 4500,
-                days: 3,
-                rating: 4.4,
-                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRaNzVu524h5yMX5MtXp5Qc3J0HxKUSl3uOvBBJlvhHco-G__TfCmU9jyE&s=10"
-            },
-
-            {
-                name: "Kerala Backwaters",
-                type: "Nature",
-                description: "Peaceful backwaters, houseboats and beautiful natural scenery",
-                budget: 6000,
-                days: 3,
-                rating: 4.6,
-                image: "https://www.oyorooms.com/travel-guide/wp-content/uploads/2021/06/Kerala-3.jpg"
-            },
-
-            {
-                name: "Manali",
-                type: "Hill Station",
-                description: "Mountains, valleys, scenic views and adventure activities",
-                budget: 6000,
-                days: 4,
-                rating: 4.5,
-                image: "https://upload.wikimedia.org/wikipedia/commons/0/03/Manali_City.jpg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original"
-            },
-
-            {
-                name: "Agra",
-                type: "Historical",
-                description: "Famous for the Taj Mahal and Mughal architecture",
-                budget: 3500,
-                days: 2,
-                rating: 4.5,
-                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwE_M0RB71DnFyWzyer44Ven8HwwgHDjeekOKXsR-6UCtNtBseNwyQVxzs&s=10"
-            },
-
-            {
-                name: "Hampi",
-                type: "Historical",
-                description: "Ancient ruins, temples and unique landscapes",
-                budget: 4000,
-                days: 2,
-                rating: 4.6,
-                image: "https://d22eux7aqicogj.cloudfront.net/assets/blogs/between-ruin-and-glory-hampi.webp"
-            },
-
-            {
-                name: "Amritsar",
-                type: "Religious & Historical",
-                description: "Golden Temple, Jallianwala Bagh and Punjabi culture",
-                budget: 4000,
-                days: 2,
-                rating: 4.7,
-                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDXSZp5CXjLnU7rIURcMNxdnqdJUIp8AIU95Hsb4odTlDz4IW-NS3pANE&s=10"
-            },
-
-            {
-                name: "Rishikesh",
-                type: "Adventure & Spiritual",
-                description: "River rafting, yoga, temples and mountain views",
-                budget: 4500,
-                days: 3,
-                rating: 4.5,
-                image: "https://www.naturetravelagency.com/uploads/1739354839Best%20time%20to%20visit%20Rishikesh.jpg"
-            },
-
-            {
-                name: "Ladakh",
-                type: "Adventure & Nature",
-                description: "High-altitude landscapes, monasteries and mountain passes",
-                budget: 10000,
-                days: 5,
-                rating: 4.7,
-                image: "https://i0.wp.com/lahimalaya.com/wp-content/uploads/2019/08/Ladakh-trip.jpg?fit=960%2C640&ssl=1"
-            },
-
-            {
-                name: "Meghalaya",
-                type: "Nature",
-                description: "Waterfalls, caves, forests and living root bridges",
-                budget: 7000,
-                days: 4,
-                rating: 4.6,
-                image: "https://s3.india.com/wp-content/uploads/2025/08/Meghalaya-Thumbnail.jpg"
-            }
-
-        ];
-
-
-        let currentPage = 1;
-
-        const cardsPerPage = 6;
-
-        let filteredDestinations = [...destinations];
-
-
-        function displayDestinations() {
-
-            const grid =
-                document.getElementById("destinationGrid");
-
-            const noResults =
-                document.getElementById("noResults");
-
-            grid.innerHTML = "";
-
-            const start =
-                (currentPage - 1) * cardsPerPage;
-
-            const end =
-                start + cardsPerPage;
-
-            const currentDestinations =
-                filteredDestinations.slice(start, end);
-
-
-            if (currentDestinations.length === 0) {
-
-                noResults.style.display = "block";
-
-                document.getElementById(
-                    "pagination"
-                ).innerHTML = "";
-
-                return;
-            }
-
-
-            noResults.style.display = "none";
-
-
-            currentDestinations.forEach(destination => {
-
-                const card =
-                    document.createElement("div");
-
-                card.className =
-                    "explore-destination-card";
-
-
-                card.innerHTML = `
-
-                    <img
-                        src="${destination.image}"
-                        alt="${destination.name}"
-                        onerror="this.style.display='none';"
-                    >
-
-                    <div class="destination-card-content">
-
-                        <h3>
-                            ${destination.name}
-                        </h3>
-
-                        <p class="destination-type">
-                            ${destination.type}
-                        </p>
-
-                        <p class="destination-description">
-                            ${destination.description}
-                        </p>
-
-                        <div class="destination-info-row">
-
-                            <span>
-                                ₹${destination.budget.toLocaleString("en-IN")}
-                            </span>
-
-                            <span>
-                                ⭐ ${destination.rating}
-                            </span>
-
-                        </div>
-
-                        <p class="destination-days">
-                            ${destination.days} days recommended
-                        </p>
-
-                    </div>
-
-                `;
-
-
-                card.addEventListener(
-                    "click",
-                    function() {
-
-                        localStorage.setItem(
-                            "selectedDestination",
-                            JSON.stringify(destination)
-                        );
-
-                        window.location.href =
-                            "destination.html";
-
-                    }
-                );
-
-
-                grid.appendChild(card);
-
-            });
-
-
-            displayPagination();
-
-        }
-
-
-        function displayPagination() {
-
-            const pagination =
-                document.getElementById("pagination");
-
-            pagination.innerHTML = "";
-
-
-            const totalPages =
-                Math.ceil(
-                    filteredDestinations.length /
-                    cardsPerPage
-                );
-
-
-            if (totalPages <= 1) {
-                return;
-            }
-
-
-            for (
-                let i = 1;
-                i <= totalPages;
-                i++
-            ) {
-
-                const button =
-                    document.createElement("button");
-
-                button.textContent = i;
-
-
-                if (i === currentPage) {
-
-                    button.classList.add(
-                        "active-page"
-                    );
-
-                }
-
-
-                button.onclick =
-                    function() {
-
-                        currentPage = i;
-
-                        displayDestinations();
-
-                        window.scrollTo({
-                            top: 0,
-                            behavior: "smooth"
-                        });
-
-                    };
-
-
-                pagination.appendChild(button);
-
-            }
-
-        }
-
-
-        function applyFilters() {
-
-            const searchValue =
-                document.getElementById(
-                    "searchInput"
-                ).value
-                .toLowerCase()
-                .trim();
-
-
-            const selectedType =
-                document.getElementById(
-                    "typeFilter"
-                ).value;
-
-
-            const selectedBudget =
-                document.getElementById(
-                    "budgetFilter"
-                ).value;
-
-
-            const selectedDuration =
-                document.getElementById(
-                    "durationFilter"
-                ).value;
-
-
-            const selectedSort =
-                document.getElementById(
-                    "sortFilter"
-                ).value;
-
-
-            filteredDestinations =
-                destinations.filter(
-                    destination => {
-
-                        const matchesSearch =
-                            destination.name
-                            .toLowerCase()
-                            .includes(
-                                searchValue
-                            );
-
-
-                        const matchesType =
-                            selectedType === "all" ||
-                            destination.type ===
-                            selectedType;
-
-
-                        const matchesBudget =
-                            selectedBudget === "all" ||
-                            destination.budget <=
-                            Number(selectedBudget);
-
-
-                        const matchesDuration =
-                            selectedDuration === "all" ||
-                            destination.days ===
-                            Number(selectedDuration);
-
-
-                        return (
-                            matchesSearch &&
-                            matchesType &&
-                            matchesBudget &&
-                            matchesDuration
-                        );
-
-                    }
-                );
-
-
-            if (selectedSort === "priceLow") {
-
-                filteredDestinations.sort(
-                    (a, b) =>
-                        a.budget - b.budget
-                );
-
-            }
-
-
-            if (selectedSort === "priceHigh") {
-
-                filteredDestinations.sort(
-                    (a, b) =>
-                        b.budget - a.budget
-                );
-
-            }
-
-
-            if (selectedSort === "ratingHigh") {
-
-                filteredDestinations.sort(
-                    (a, b) =>
-                        b.rating - a.rating
-                );
-
-            }
-
-
-            currentPage = 1;
-
-            displayDestinations();
-
-        }
-
-
-        function searchDestinations() {
-
-            applyFilters();
-
-        }
-
-
-        document
-            .getElementById("searchInput")
-            .addEventListener(
-                "keydown",
-                function(event) {
-
-                    if (event.key === "Enter") {
-
-                        searchDestinations();
-
-                    }
-
-                }
-            );
-
-
-        displayDestinations();
-
-    </script>
-
+<script src="explore.js"></script>
+        
+Waymate/explore.html
 </body>
 
 </html>
