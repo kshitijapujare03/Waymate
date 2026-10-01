@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Waymate - Destination</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="destination-page">
+
+        <nav class="navbar">
+
+            <div class="logo">
+                <span>Way</span>mate
+            </div>
+
+            <div class="nav-links">
+                <a href="home.html">Home</a>
+                <a href="explore.html">Explore</a>
+                <a href="plan.html">Plan My Trip</a>
+                <a href="trips.html">My Trips</a>
+                <a href="account.html">My Account</a>
+            </div>
+
+        </nav>
+
+
+        <main class="destination-container">
+
+            <a href="#" class="back-button" id="backButton">
+                ← Back
+            </a>
+
+            <div id="destinationContent"></div>
+
+        </main>
+
+
+        <footer class="footer">
+
+            <p>
+                Your journey, our recommendation.
+            </p>
+
+        </footer>
+
+    </div>
+
+
+    <script>
+
+        // ==================================================
+        // SELECTED DESTINATION
+        // ==================================================
+
+        const selectedDestination =
+            JSON.parse(
+                localStorage.getItem("selectedDestination")
+            );
+
+
+        // ==================================================
+        // DESTINATION DETAILS
+        // ==================================================
+
+        const destinationDetails = {
+
+            "Goa": {
+
+                location:
+                    "Goa, India",
+
+                weather:
+                    "Warm and tropical. Summers are hot, while winters are pleasant.",
+
+                packing: [
+                    "Light cotton clothes",
+                    "Sunglasses",
+                    "Sunscreen",
+                    "Comfortable footwear",
+                    "Swimwear"
+                ],
+
+                spots: [
+                    "Baga Beach",
+                    "Calangute Beach",
+                    "Fort Aguada",
+                    "Basilica of Bom Jesus",
+                    "Dudhsagar Falls"
+                ]
+
+            },
+
+
+            "Jaipur": {
+
+                location:
+                    "Jaipur, Rajasthan, India",
+
+                weather:
+                    "Generally warm and dry. Winters are cooler and comfortable for sightseeing.",
+
+                packing: [
+                    "Light comfortable clothes",
+                    "Sunglasses",
+                    "Sunscreen",
+                    "Comfortable walking shoes",
+                    "Water bottle"
+                ],
+
+                spots: [
+                    "Amber Fort",
+                    "Hawa Mahal",
+                    "City Palace",
+                    "Jantar Mantar",
+                    "Nahargarh Fort"
+                ]
+
+            },
+
+
+            "Kerala Backwaters": {
+
+                location:
+                    "Kerala, India",
+
+                weather:
+                    "Tropical and humid with warm temperatures throughout most of the year.",
+
+                packing: [
+                    "Light cotton clothes",
+                    "Umbrella",
+                    "Sunscreen",
+                    "Mosquito repellent",
+                    "Comfortable footwear"
+                ],
+
+                spots: [
+                    "Alleppey Backwaters",
+                    "Kumarakom",
+                    "Vembanad Lake",
+                    "Houseboat Cruises",
+                    "Marari Beach"
+                ]
+
+            },
+
+
+            "Manali": {
+
+                location:
+                    "Himachal Pradesh, India",
+
+                weather:
+                    "Cool mountain climate. Winters are cold and summers are pleasant.",
+
+                packing: [
+                    "Warm clothes",
+                    "Jacket",
+                    "Comfortable shoes",
+                    "Sunglasses",
+                    "Moisturizer"
+                ],
+
+                spots: [
+                    "Solang Valley",
+                    "Rohtang Pass",
+                    "Hadimba Temple",
+                    "Mall Road",
+                    "Old Manali"
+                ]
+
+            },
+
+
+            "Agra": {
+
+                location:
+                    "Uttar Pradesh, India",
+
+                weather:
+                    "Hot summers and cooler winters. Winters are generally comfortable for sightseeing.",
+
+                packing: [
+                    "Comfortable clothes",
+                    "Sunglasses",
+                    "Sunscreen",
+                    "Comfortable walking shoes",
+                    "Water bottle"
+                ],
+
+                spots: [
+                    "Taj Mahal",
+                    "Agra Fort",
+                    "Mehtab Bagh",
+                    "Itmad-ud-Daulah's Tomb",
+                    "Fatehpur Sikri"
+                ]
+
+            },
+
+
+            "Hampi": {
+
+                location:
+                    "Karnataka, India",
+
+                weather:
+                    "Mostly warm and dry. Cooler months are more comfortable for exploring.",
+
+                packing: [
+                    "Light cotton clothes",
+                    "Comfortable walking shoes",
+                    "Sunglasses",
+                    "Sunscreen",
+                    "Water bottle"
+                ],
+
+                spots: [
+                    "Virupaksha Temple",
+                    "Vittala Temple",
+                    "Hampi Bazaar",
+                    "Lotus Mahal",
+                    "Matanga Hill"
+                ]
+
+            },
+
+
+            "Amritsar": {
+
+                location:
+                    "Punjab, India",
+
+                weather:
+                    "Hot summers and cold winters with pleasant weather during spring and autumn.",
+
+                packing: [
+                    "Comfortable clothes",
+                    "Comfortable footwear",
+                    "Sunglasses",
+                    "Sunscreen",
+                    "Light jacket for cooler months"
+                ],
+
+                spots: [
+                    "Golden Temple",
+                    "Jallianwala Bagh",
+                    "Wagah Border",
+                    "Partition Museum",
+                    "Gobindgarh Fort"
+                ]
+
+            },
+
+
+            "Rishikesh": {
+
+                location:
+                    "Uttarakhand, India",
+
+                weather:
+                    "Generally warm with pleasant winters. Monsoon brings heavy rainfall.",
+
+                packing: [
+                    "Comfortable clothes",
+                    "Sports shoes",
+                    "Sunscreen",
+                    "Water bottle",
+                    "Light jacket"
+                ],
+
+                spots: [
+                    "Laxman Jhula",
+                    "Triveni Ghat",
+                    "River Rafting",
+                    "Neer Garh Waterfall",
+                    "Beatles Ashram"
+                ]
+
+            },
+
+
+            "Ladakh": {
+
+                location:
+                    "Ladakh, India",
+
+                weather:
+                    "Cold and dry mountain climate with strong temperature changes between day and night.",
+
+                packing: [
+                    "Warm layered clothes",
+                    "Jacket",
+                    "Sunglasses",
+                    "Sunscreen",
+                    "Comfortable shoes"
+                ],
+
+                spots: [
+                    "Pangong Lake",
+                    "Nubra Valley",
+                    "Leh Palace",
+                    "Magnetic Hill",
+                    "Khardung La"
+                ]
+
+            },
+
+
+            "Meghalaya": {
+
+                location:
+                    "Meghalaya, India",
+
+                weather:
+                    "Cool and pleasant in many areas with frequent rainfall, especially during monsoon.",
+
+                packing: [
+                    "Light layers",
+                    "Rain jacket",
+                    "Waterproof footwear",
+                    "Umbrella",
+                    "Mosquito repellent"
+                ],
+
+                spots: [
+                    "Living Root Bridges",
+                    "Cherrapunji",
+                    "Shillong",
+                    "Dawki",
+                    "Mawsmai Cave"
+                ]
+
+            }
+
+        };
+
+
+        // ==================================================
+        // DESTINATION IMAGES
+        // ==================================================
+
+        const destinationImages = {
+
+            "Meghalaya":
+                "https://t4.ftcdn.net/jpg/02/91/30/71/360_F_291307182_VbdoNkRulG9XkGgDQkwKUIdR4GcuLtXg.jpg",
+
+            "Goa":
+                "https://www.goatourismhotels.com/img/north-goa-sightseeing-8.jpg",
+
+            "Jaipur":
+                "https://static.vecteezy.com/system/resources/thumbnails/042/560/373/small/amer-amber-fort-rajasthan-india-photo.jpg",
+
+            "Kerala Backwaters":
+                "https://t3.ftcdn.net/jpg/09/46/17/06/360_F_946170699_pspnWARcAaQv9ucK7NAdNZ9whmUwGcA2.jpg",
+
+            // Updated Manali image
+            "Manali":
+                "https://www.sostravelhouse.com/public/uploads/images/post/67fe2ee9cc351.webp",
+
+            "Agra":
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSty8TwBsTy1y7rhBDAiIflVsttO-jemLqAb1wrhzfajA&s=10",
+
+            // Updated Hampi image
+            "Hampi":
+                "https://commons.wikimedia.org/wiki/Special:Redirect/file/Hampi_virupaksha_temple.jpg",
+
+            "Rishikesh":
+                "https://www.sterlingholidays.com/blog/wp-content/uploads/2025/12/niloy-banerjee-w2uhp5VrF8M-unsplash-scaled.jpg",
+
+            "Amritsar":
+                "https://www.tourmyindia.com/states/punjab/images/tour-banner.jpg",
+
+            "Ladakh":
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLQVD1FSbihO8skBvxlhRZdUM5-_RaJXOkFHPLzlCIpn1K3N5tijJGJnB4&s=10"
+
+        };
+
+
+        // ==================================================
+        // DEFAULT RECOMMENDED DAYS
+        // ==================================================
+
+        const DEFAULT_DAYS = {
+
+            "Goa": 3,
+
+            "Manali": 4,
+
+            "Jaipur": 3,
+
+            "Kerala Backwaters": 4,
+
+            "Agra": 2,
+
+            "Hampi": 3,
+
+            "Amritsar": 2,
+
+            "Rishikesh": 3,
+
+            "Ladakh": 5,
+
+            "Meghalaya": 4
+
+        };
+
+
+        // ==================================================
+        // GET RECOMMENDED DAYS
+        // ==================================================
+
+        function getRecommendedDays(destination) {
+
+            if (!destination) {
+
+                return 0;
+
+            }
+
+
+            const apiDays =
+                Number(
+                    destination.recommended_days ??
+                    destination.number_of_days ??
+                    destination.duration ??
+                    destination.days ??
+                    0
+                );
+
+
+            if (apiDays > 0) {
+
+                return apiDays;
+
+            }
+
+
+            return DEFAULT_DAYS[
+                destination.name
+            ] || 0;
+
+        }
+
+
+        // ==================================================
+        // SHOW DESTINATION
+        // ==================================================
+
+        function showDestination() {
+
+            const container =
+                document.getElementById(
+                    "destinationContent"
+                );
+
+
+            if (!container) {
+
+                return;
+
+            }
+
+
+            // ------------------------------------------
+            // DESTINATION NOT FOUND
+            // ------------------------------------------
+
+            if (!selectedDestination) {
+
+                container.innerHTML = `
+
+                    <div class="not-found">
+
+                        <h2>
+                            Destination not found
+                        </h2>
+
+                        <p>
+                            Please go back to Explore
+                            and select a destination.
+                        </p>
+
+                    </div>
+
+                `;
+
+                return;
+
+            }
+
+
+            // ------------------------------------------
+            // GET DESTINATION DETAILS
+            // ------------------------------------------
+
+            const details =
+                destinationDetails[
+                    selectedDestination.name
+                ];
+
+
+            if (!details) {
+
+                container.innerHTML = `
+
+                    <div class="not-found">
+
+                        <h2>
+                            Destination details unavailable
+                        </h2>
+
+                        <p>
+                            Please go back to Explore
+                            and select another destination.
+                        </p>
+
+                    </div>
+
+                `;
+
+                return;
+
+            }
+
+
+            // ------------------------------------------
+            // DESTINATION IMAGE
+            // ------------------------------------------
+
+            const destinationImage =
+                destinationImages[
+                    selectedDestination.name
+                ] ||
+                selectedDestination.image ||
+                "";
+
+
+            // ------------------------------------------
+            // RECOMMENDED DAYS
+            // ------------------------------------------
+
+            const recommendedDays =
+                getRecommendedDays(
+                    selectedDestination
+                );
+
+
+            // ==================================================
+            // CREATE DESTINATION PAGE
+            // ==================================================
+
+            container.innerHTML = `
+
+                <section class="destination-hero">
+
+                    <img
+                        src="${destinationImage}"
+                        alt="${selectedDestination.name}"
+                    >
+
+                    <div class="destination-main-info">
+
+                        <h1>
+                            ${selectedDestination.name}
+                        </h1>
+
+
+                        <div class="destination-location">
+                            📍 ${details.location}
+                        </div>
+
+
+                        <div class="destination-type">
+                            ${selectedDestination.type}
+                        </div>
+
+
+                        <p class="destination-description">
+                            ${selectedDestination.description}
+                        </p>
+
+
+                        <div class="destination-buttons">
+
+                            <button
+                                class="save-button"
+                                id="saveButton"
+                                onclick="toggleSave()"
+                            >
+                                ♡ Save Destination
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <section class="details-grid">
+
+
+                    <!-- BUDGET -->
+
+                    <div class="detail-box">
+
+                        <h3>
+                            💰 Budget
+                        </h3>
+
+                        <p>
+                            Approximately ₹${Number(
+                                selectedDestination.budget || 0
+                            ).toLocaleString("en-IN")}
+                        </p>
+
+                    </div>
+
+
+                    <!-- RECOMMENDED DURATION -->
+
+                    <div class="detail-box">
+
+                        <h3>
+                            📅 Recommended Duration
+                        </h3>
+
+                        <p id="recommendedDuration">
+
+                            ${
+                                recommendedDays > 0
+                                    ? recommendedDays + " days"
+                                    : "Not available"
+                            }
+
+                        </p>
+
+                    </div>
+
+
+                    <!-- WEATHER -->
+
+                    <div class="detail-box">
+
+                        <h3>
+                            ☀️ Weather
+                        </h3>
+
+                        <p>
+                            ${details.weather}
+                        </p>
+
+                    </div>
+
+
+                    <!-- RATING -->
+
+                    <div class="detail-box">
+
+                        <h3>
+                            ⭐ Rating
+                        </h3>
+
+                        <p>
+                            ${selectedDestination.rating || 0} / 5
+                        </p>
+
+                    </div>
+
+
+                    <!-- PACKING ESSENTIALS -->
+
+                    <div class="detail-box">
+
+                        <h3>
+                            🎒 Packing Essentials
+                        </h3>
+
+                        <ul class="info-list">
+
+                            ${details.packing.map(
+                                item => `
+                                    <li>
+                                        ${item}
+                                    </li>
+                                `
+                            ).join("")}
+
+                        </ul>
+
+                    </div>
+
+
+                    <!-- LOCATION -->
+
+                    <div class="detail-box">
+
+                        <h3>
+                            📍 Location
+                        </h3>
+
+                        <p>
+                            ${details.location}
+                        </p>
+
+                    </div>
+
+
+                </section>
+
+
+                <!-- FAMOUS SPOTS -->
+
+                <section class="famous-spots">
+
+                    <h2>
+                        Famous Spots
+                    </h2>
+
+                    <ul>
+
+                        ${details.spots.map(
+                            spot => `
+                                <li>
+                                    ${spot}
+                                </li>
+                            `
+                        ).join("")}
+
+                    </ul>
+
+                </section>
+
+            `;
+
+
+            // Update Save button after
+            // destination content is created.
+
+            updateSaveButton();
+
+        }
+
+
+        // ==================================================
+        // SAVE / UNSAVE DESTINATION
+        // ==================================================
+
+        function toggleSave() {
+
+            if (!selectedDestination) {
+
+                return;
+
+            }
+
+
+            let savedDestinations =
+                JSON.parse(
+                    localStorage.getItem(
+                        "savedDestinations"
+                    )
+                ) || [];
+
+
+            const alreadySaved =
+                savedDestinations.some(
+                    destination =>
+                        destination.name ===
+                        selectedDestination.name
+                );
+
+
+            if (alreadySaved) {
+
+                // Remove destination
+
+                savedDestinations =
+                    savedDestinations.filter(
+                        destination =>
+                            destination.name !==
+                            selectedDestination.name
+                    );
+
+            }
+
+            else {
+
+                // Save destination
+
+                savedDestinations.push(
+                    selectedDestination
+                );
+
+            }
+
+
+            localStorage.setItem(
+                "savedDestinations",
+                JSON.stringify(
+                    savedDestinations
+                )
+            );
+
+
+            updateSaveButton();
+
+        }
+
+
+        // ==================================================
+        // UPDATE SAVE BUTTON
+        // ==================================================
+
+        function updateSaveButton() {
+
+            const button =
+                document.getElementById(
+                    "saveButton"
+                );
+
+
+            if (!button) {
+
+                return;
+
+            }
+
+
+            const savedDestinations =
+                JSON.parse(
+                    localStorage.getItem(
+                        "savedDestinations"
+                    )
+                ) || [];
+
+
+            const isSaved =
+                savedDestinations.some(
+                    destination =>
+                        destination.name ===
+                        selectedDestination.name
+                );
+
+
+            if (isSaved) {
+
+                button.innerHTML =
+                    "✓ Saved";
+
+                button.classList.add(
+                    "saved"
+                );
+
+            }
+
+            else {
+
+                button.innerHTML =
+                    "♡ Save Destination";
+
+                button.classList.remove(
+                    "saved"
+                );
+
+            }
+
+        }
+
+
+        // ==================================================
+        // SHOW DESTINATION
+        // ==================================================
+
+        showDestination();
+
+    </script>
+
+
+    <!-- ==================================================
+         BACK BUTTON
+         ================================================== -->
+
+    <script>
+
+        const backButton =
+            document.getElementById(
+                "backButton"
+            );
+
+
+        if (backButton) {
+
+            const referrer =
+                document.referrer || "";
+
+
+            const destinationSource =
+                localStorage.getItem(
+                    "destinationSource"
+                );
+
+
+            // ------------------------------------------
+            // Opened from Explore
+            // ------------------------------------------
+
+            if (
+                referrer.includes(
+                    "explore.html"
+                )
+            ) {
+
+                backButton.href =
+                    "explore.html";
+
+            }
+
+
+            // ------------------------------------------
+            // Opened from Home
+            // ------------------------------------------
+
+            else if (
+                referrer.includes(
+                    "home.html"
+                )
+            ) {
+
+                backButton.href =
+                    "home.html";
+
+            }
+
+
+            // ------------------------------------------
+            // Fallback: stored source
+            // ------------------------------------------
+
+            else if (
+                destinationSource === "explore"
+            ) {
+
+                backButton.href =
+                    "explore.html";
+
+            }
+
+
+            else {
+
+                backButton.href =
+                    "home.html";
+
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>
