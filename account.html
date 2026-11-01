@@ -1,0 +1,722 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Account | WAYMATE</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --teal:#159b91;
+    --teal-dark:#087f78;
+    --teal-light:#e4f6f3;
+    --background:#f4f9f8;
+    --text:#203b3a;
+    --muted:#718987;
+    --white:#fff;
+}
+
+* {
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body {
+    font-family:'Poppins',sans-serif;
+    background:var(--background);
+    color:var(--text);
+}
+
+/* NAVBAR - MATCHING HOME PAGE */
+
+.navbar {
+    height:75px;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 8%;
+    box-shadow:0 2px 10px rgba(0,0,0,0.06);
+    position:relative;
+    z-index:10;
+}
+
+.logo {
+    font-size:28px;
+    font-weight:bold;
+    color:#0b6670;
+    white-space:nowrap;
+}
+
+.logo span {
+    font-size:30px;
+    margin-right:6px;
+}
+
+.nav-links {
+    display:flex;
+    align-items:center;
+    gap:30px;
+}
+
+.nav-links a {
+    text-decoration:none;
+    font-size:15px;
+    color:#24565d;
+    font-weight:500;
+    transition:0.3s;
+}
+
+.nav-links a:hover {
+    color:#0b8994;
+}
+
+.nav-links a.active {
+    color:#0b8994;
+    font-weight:700;
+}
+
+.profile-icon {
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:#e4f5f6;
+    color:#0b6670;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    text-decoration:none;
+}
+
+/* MAIN */
+
+.container {
+    width:86%;
+    max-width:1100px;
+    margin:45px auto 75px;
+}
+
+.page-heading {
+    margin-bottom:28px;
+}
+
+.page-heading h1 {
+    font-size:32px;
+    font-weight:700;
+}
+
+.page-heading p {
+    color:var(--muted);
+    font-size:14px;
+    margin-top:5px;
+}
+
+/* PROFILE CARD */
+
+.profile-card {
+    background:linear-gradient(115deg,#dff5f0,#f7fffd);
+    border:1px solid #d4ece7;
+    border-radius:20px;
+    padding:30px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    margin-bottom:35px;
+}
+
+.profile-info {
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+.avatar {
+    width:85px;
+    height:85px;
+    border-radius:50%;
+    background:var(--teal);
+    color:white;
+    display:grid;
+    place-items:center;
+    font-size:30px;
+    font-weight:700;
+    border:4px solid white;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+.profile-info h2 {
+    font-size:22px;
+}
+
+.profile-info p {
+    font-size:13px;
+    color:var(--muted);
+    margin-top:4px;
+}
+
+.member-label {
+    display:inline-block;
+    margin-top:9px;
+    padding:5px 12px;
+    border-radius:20px;
+    background:white;
+    color:var(--teal-dark);
+    font-size:10px;
+    font-weight:600;
+}
+
+.edit-btn {
+    background:var(--teal);
+    color:white;
+    border:none;
+    padding:11px 22px;
+    border-radius:9px;
+    font-family:inherit;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.edit-btn:hover {
+    background:var(--teal-dark);
+}
+
+/* PERSONAL INFORMATION */
+
+.section-title {
+    font-size:21px;
+    margin-bottom:17px;
+}
+
+.details-card {
+    background:white;
+    border-radius:18px;
+    padding:28px 30px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.03);
+}
+
+.detail-row {
+    display:flex;
+    align-items:center;
+    gap:17px;
+    padding:17px 0;
+    border-bottom:1px solid #edf2f1;
+}
+
+.detail-row:last-child {
+    border-bottom:none;
+}
+
+.detail-icon {
+    width:44px;
+    height:44px;
+    border-radius:12px;
+    background:var(--teal-light);
+    display:grid;
+    place-items:center;
+    font-size:20px;
+    flex-shrink:0;
+}
+
+.detail-info {
+    flex:1;
+    min-width:0;
+}
+
+.detail-info span {
+    display:block;
+    color:var(--muted);
+    font-size:11px;
+    margin-bottom:3px;
+}
+
+.detail-info strong {
+    display:block;
+    font-size:14px;
+    font-weight:600;
+    overflow-wrap:anywhere;
+}
+
+/* LOGOUT */
+
+.logout-section {
+    background:white;
+    border:1px solid #f0dddd;
+    border-radius:16px;
+    padding:22px 25px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    margin-top:30px;
+}
+
+.logout-section h3 {
+    font-size:15px;
+}
+
+.logout-section p {
+    font-size:11px;
+    color:var(--muted);
+    margin-top:4px;
+}
+
+.logout-btn {
+    border:1px solid #e5a7a7;
+    background:#fff5f5;
+    color:#c34e4e;
+    padding:10px 20px;
+    border-radius:8px;
+    font-family:inherit;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.logout-btn:hover {
+    background:#ffe8e8;
+}
+
+/* MODAL */
+
+.modal {
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(15,40,38,0.55);
+    z-index:200;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.modal-content {
+    background:white;
+    padding:30px;
+    width:100%;
+    max-width:430px;
+    border-radius:18px;
+    position:relative;
+}
+
+.modal-content h2 {
+    font-size:21px;
+    margin-bottom:20px;
+}
+
+.modal-content label {
+    display:block;
+    font-size:12px;
+    margin-bottom:6px;
+    font-weight:600;
+}
+
+.modal-content input {
+    width:100%;
+    padding:12px;
+    border:1px solid #dce9e6;
+    border-radius:8px;
+    font-family:inherit;
+    margin-bottom:16px;
+    outline:none;
+}
+
+.modal-content input:focus {
+    border-color:var(--teal);
+}
+
+.save-btn {
+    width:100%;
+    background:var(--teal);
+    color:white;
+    border:none;
+    padding:12px;
+    border-radius:8px;
+    font-family:inherit;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.save-btn:hover {
+    background:var(--teal-dark);
+}
+
+.close-btn {
+    position:absolute;
+    right:18px;
+    top:15px;
+    font-size:23px;
+    color:#82918f;
+    cursor:pointer;
+}
+
+/* FOOTER */
+
+footer {
+    text-align:center;
+    padding:22px;
+    background:white;
+    color:#82918f;
+    font-size:11px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:750px) {
+
+    .navbar {
+        padding:12px 4%;
+        height:auto;
+        min-height:75px;
+        flex-wrap:wrap;
+        gap:12px;
+    }
+
+    .nav-links {
+        gap:15px;
+        flex-wrap:wrap;
+    }
+
+    .nav-links a {
+        font-size:12px;
+    }
+
+    .logo {
+        font-size:23px;
+    }
+
+    .profile-icon {
+        width:34px;
+        height:34px;
+        font-size:19px;
+    }
+
+    .container {
+        width:91%;
+        margin-top:30px;
+    }
+
+    .page-heading h1 {
+        font-size:26px;
+    }
+
+    .profile-card {
+        padding:20px;
+        flex-wrap:wrap;
+    }
+
+    .avatar {
+        width:65px;
+        height:65px;
+        font-size:23px;
+    }
+
+    .profile-info h2 {
+        font-size:17px;
+    }
+
+    .edit-btn {
+        width:100%;
+    }
+
+    .details-card {
+        padding:18px;
+    }
+
+    .logout-section {
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .logout-btn {
+        width:100%;
+    }
+}
+
+@media(max-width:420px) {
+    .nav-links {
+        gap:10px;
+    }
+
+    .nav-links a {
+        font-size:11px;
+    }
+
+    .logo {
+        font-size:21px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+
+<nav class="navbar">
+
+    <div class="logo"><span>✈</span> Waymate</div>
+
+    <div class="nav-links">
+        <a href="home.html">Home</a>
+        <a href="explore.html">Explore</a>
+        <a href="trips.html">My Trips</a>
+        <a href="account.html" class="active">My Account</a>
+    </div>
+
+    <a href="account.html" class="profile-icon" aria-label="My Account">♙</a>
+
+</nav>
+
+<main class="container">
+
+    <div class="page-heading">
+        <h1>My Account</h1>
+        <p>Manage your personal information and account details.</p>
+    </div>
+
+    <!-- PROFILE CARD -->
+
+    <section class="profile-card">
+
+        <div class="profile-info">
+
+            <div class="avatar" id="avatarInitial">S</div>
+
+            <div>
+                <h2 id="profileName">Sailee</h2>
+                <p id="profileEmail">sailee@example.com</p>
+                <span class="member-label">✦ WAYMATE EXPLORER</span>
+            </div>
+
+        </div>
+
+        <button class="edit-btn" onclick="openProfileModal()">
+            ✎ Edit Profile
+        </button>
+
+    </section>
+
+    <!-- PERSONAL INFORMATION -->
+
+    <h2 class="section-title">Personal Information</h2>
+
+    <section class="details-card">
+
+        <div class="detail-row">
+            <div class="detail-icon">👤</div>
+
+            <div class="detail-info">
+                <span>Full Name</span>
+                <strong id="detailName">Sailee</strong>
+            </div>
+        </div>
+
+        <div class="detail-row">
+            <div class="detail-icon">✉️</div>
+
+            <div class="detail-info">
+                <span>Email Address</span>
+                <strong id="detailEmail">sailee@example.com</strong>
+            </div>
+        </div>
+
+        <div class="detail-row">
+            <div class="detail-icon">📱</div>
+
+            <div class="detail-info">
+                <span>Mobile Number</span>
+                <strong id="detailPhone">Not added yet</strong>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- LOGOUT -->
+
+    <section class="logout-section">
+
+        <div>
+            <h3>Logout from WAYMATE</h3>
+            <p>You can log in again anytime to continue your journey.</p>
+        </div>
+
+        <button class="logout-btn" onclick="logoutUser()">
+            Logout ↗
+        </button>
+
+    </section>
+
+</main>
+
+<footer>
+    © 2026 WAYMATE · Your Journey, Our Recommendation.
+</footer>
+
+<!-- EDIT PROFILE MODAL -->
+
+<div class="modal" id="profileModal">
+
+    <div class="modal-content">
+
+        <span class="close-btn" onclick="closeProfileModal()">×</span>
+
+        <h2>Edit Profile</h2>
+
+        <label>Full Name</label>
+        <input type="text" id="editName" placeholder="Enter your full name">
+
+        <label>Email Address</label>
+        <input type="email" id="editEmail" placeholder="Enter your email">
+
+        <label>Mobile Number</label>
+        <input type="tel" id="editPhone" placeholder="Enter your mobile number">
+
+        <button class="save-btn" onclick="saveProfile()">
+            Save Changes
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+const PROFILE_KEY = "waymateUserProfile";
+
+/* LOAD PROFILE */
+
+function loadProfile() {
+
+    let profile = {};
+
+    try {
+        profile = JSON.parse(localStorage.getItem(PROFILE_KEY)) || {};
+    } catch (error) {
+        profile = {};
+    }
+
+    const name = profile.name || "Sailee";
+    const email = profile.email || "sailee@example.com";
+    const phone = profile.phone || "";
+
+    document.getElementById("profileName").textContent = name;
+    document.getElementById("profileEmail").textContent = email;
+
+    document.getElementById("detailName").textContent = name;
+    document.getElementById("detailEmail").textContent = email;
+
+    document.getElementById("detailPhone").textContent =
+        phone || "Not added yet";
+
+    document.getElementById("avatarInitial").textContent =
+        name.charAt(0).toUpperCase() || "S";
+}
+
+/* OPEN EDIT PROFILE */
+
+function openProfileModal() {
+
+    let profile = {};
+
+    try {
+        profile = JSON.parse(localStorage.getItem(PROFILE_KEY)) || {};
+    } catch (error) {
+        profile = {};
+    }
+
+    document.getElementById("editName").value =
+        profile.name || document.getElementById("profileName").textContent;
+
+    document.getElementById("editEmail").value =
+        profile.email || document.getElementById("profileEmail").textContent;
+
+    document.getElementById("editPhone").value =
+        profile.phone || "";
+
+    document.getElementById("profileModal").style.display = "flex";
+}
+
+/* CLOSE EDIT PROFILE */
+
+function closeProfileModal() {
+    document.getElementById("profileModal").style.display = "none";
+}
+
+/* SAVE PROFILE */
+
+function saveProfile() {
+
+    const name = document.getElementById("editName").value.trim();
+    const email = document.getElementById("editEmail").value.trim();
+    const phone = document.getElementById("editPhone").value.trim();
+
+    if (!name || !email) {
+        alert("Please enter your name and email address.");
+        return;
+    }
+
+    const profile = {
+        name: name,
+        email: email,
+        phone: phone
+    };
+
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+
+    loadProfile();
+    closeProfileModal();
+
+    alert("Profile updated successfully!");
+}
+
+/* LOGOUT */
+
+function logoutUser() {
+
+    const confirmLogout = confirm(
+        "Are you sure you want to logout?"
+    );
+
+    if (!confirmLogout) return;
+
+    const authKeys = [
+        "token",
+        "authToken",
+        "access_token",
+        "user",
+        "currentUser",
+        "loggedInUser",
+        "waymateToken"
+    ];
+
+    authKeys.forEach(key => localStorage.removeItem(key));
+
+    window.location.href = "index.html";
+}
+
+/* CLOSE MODAL ON OUTSIDE CLICK */
+
+window.addEventListener("click", function(event) {
+
+    const modal = document.getElementById("profileModal");
+
+    if (event.target === modal) {
+        closeProfileModal();
+    }
+});
+
+/* INITIALISE */
+
+loadProfile();
+
+</script>
+
+</body>
+</html>

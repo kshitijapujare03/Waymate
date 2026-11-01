@@ -1,0 +1,1416 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Trips | Waymate</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+/* PAGE */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f8f7;
+    color: #243b3b;
+}
+
+/* COMMON HOME PAGE NAVBAR */
+.navbar {
+    height: 75px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    position: relative;
+    z-index: 10;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #0b6670;
+}
+
+.logo span {
+    font-size: 30px;
+    margin-right: 6px;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.nav-links a {
+    font-size: 15px;
+    color: #24565d;
+    font-weight: 500;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: #0b8994;
+}
+
+.nav-links a.active {
+    font-weight: bold;
+}
+
+/* PAGE CONTENT */
+.container {
+    max-width: 1200px;
+    margin: 35px auto;
+    padding: 0 25px;
+}
+
+.page-heading {
+    margin-bottom: 25px;
+}
+
+.page-heading h1 {
+    font-size: 30px;
+    color: #174d4a;
+}
+
+.page-heading p {
+    color: #758987;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.section {
+    margin-bottom: 45px;
+}
+
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 17px;
+}
+
+.section-heading h2 {
+    font-size: 22px;
+    color: #174d4a;
+}
+
+.section-heading p {
+    font-size: 13px;
+    color: #81918e;
+    margin-top: 5px;
+}
+
+/* TRAVEL PLANS */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.stat {
+    background: white;
+    border: 1px solid #e8efed;
+    border-radius: 15px;
+    padding: 17px 20px;
+}
+
+.stat strong {
+    display: block;
+    font-size: 25px;
+    color: #167d78;
+    margin-bottom: 5px;
+}
+
+.stat span {
+    font-size: 12px;
+    color: #7c8d89;
+}
+
+.plan-panel {
+    background: white;
+    border: 1px solid #e6eeeb;
+    border-radius: 18px;
+    padding: 20px;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 17px;
+}
+
+.tab {
+    border: 0;
+    background: #f0f5f3;
+    padding: 10px 18px;
+    border-radius: 20px;
+    color: #617572;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.tab.active {
+    background: #167d78;
+    color: white;
+}
+
+.trip-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+}
+
+.trip-card {
+    display: flex;
+    gap: 13px;
+    border: 1px solid #edf1ef;
+    border-radius: 13px;
+    padding: 12px;
+    align-items: center;
+}
+
+.trip-card img {
+    width: 85px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.trip-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.trip-info h3 {
+    font-size: 16px;
+    color: #244c49;
+    margin-bottom: 5px;
+}
+
+.trip-info p {
+    font-size: 12px;
+    color: #84918f;
+    margin-bottom: 8px;
+}
+
+.trip-actions {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+
+.small-btn {
+    border: 0;
+    background: #e8f4f1;
+    color: #167d78;
+    padding: 7px 10px;
+    border-radius: 7px;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.empty-state {
+    padding: 25px;
+    text-align: center;
+    color: #8b9a97;
+    font-size: 13px;
+    grid-column: 1/-1;
+}
+
+.bucket-box {
+    margin-top: 18px;
+    background: #f0f8f5;
+    border-radius: 14px;
+    padding: 17px;
+}
+
+.bucket-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.bucket-top h3 {
+    font-size: 15px;
+    color: #28635d;
+}
+
+.bucket-top p {
+    font-size: 12px;
+    color: #81918e;
+    margin-top: 4px;
+}
+
+.bucket-items {
+    display: flex;
+    gap: 9px;
+    flex-wrap: wrap;
+    margin-top: 13px;
+}
+
+.bucket-item {
+    background: white;
+    border: 1px solid #dfebe7;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: #54716c;
+}
+
+.bucket-item button {
+    border: 0;
+    background: none;
+    color: #b76c60;
+    margin-left: 7px;
+    cursor: pointer;
+}
+
+/* MEMORY WALL */
+.memory-section {
+    margin-top: 55px;
+}
+
+.memory-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 35px 25px;
+    padding: 35px 30px 45px;
+    border: 12px solid #9b82a8;
+    border-radius: 8px;
+    background-color: #e9e1f0;
+    background-image:
+        radial-gradient(ellipse at 15% 25%,#ffffff70 0%,transparent 35%),
+        radial-gradient(ellipse at 80% 65%,#c7b2d455 0%,transparent 40%),
+        radial-gradient(ellipse at 50% 10%,#f9f1fa88 0%,transparent 30%),
+        repeating-linear-gradient(4deg,transparent 0px,transparent 9px,#9b82a812 10px,#9b82a812 11px),
+        repeating-linear-gradient(94deg,transparent 0px,transparent 17px,#ffffff20 18px,#ffffff20 19px);
+    box-shadow: inset 0 0 25px #78618430, 0 12px 28px #47335220;
+    min-height: 400px;
+}
+
+.memory-grid:before {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border: 1px dashed #ffffffa0;
+    pointer-events: none;
+}
+
+.memory-wall-heading {
+    grid-column: 1/-1;
+    position: relative;
+    z-index: 2;
+    padding: 8px 12px 23px;
+    border-bottom: 1px dashed #a58eaf;
+    margin-bottom: 5px;
+}
+
+.memory-wall-heading h2 {
+    font-family: "Trebuchet MS", Arial, sans-serif;
+    font-size: 27px;
+    color: #594466;
+    margin-bottom: 9px;
+}
+
+.memory-wall-heading p {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #74657e;
+    max-width: 650px;
+}
+
+.memory-sticker {
+    display: inline-block;
+    margin-top: 12px;
+    background: #fff8ed;
+    color: #795d83;
+    padding: 8px 13px;
+    border-radius: 20px;
+    font-size: 11px;
+    box-shadow: 0 3px 8px #78618425;
+    transform: rotate(-2deg);
+}
+
+.memory-card {
+    position: relative;
+    min-width: 0;
+    padding: 13px 12px 17px;
+    background: transparent;
+    z-index: 1;
+}
+
+.memory-card:nth-child(odd) {
+    transform: rotate(-.8deg);
+}
+
+.memory-card:nth-child(even) {
+    transform: rotate(.8deg);
+}
+
+.memory-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 17px;
+    padding: 0 5px;
+}
+
+.memory-card-top h3 {
+    font-family: "Trebuchet MS", Arial, sans-serif;
+    font-size: 21px;
+    color: #594466;
+    letter-spacing: .3px;
+}
+
+.memory-card-top span {
+    font-size: 10px;
+    color: #70577b;
+    background: #fff5e9;
+    padding: 6px 9px;
+    border-radius: 3px;
+    transform: rotate(2deg);
+    white-space: nowrap;
+}
+
+.memory-collage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 13px 10px;
+    padding: 5px 3px 12px;
+    min-height: 175px;
+}
+
+.memory-photo {
+    position: relative;
+    width: 30%;
+    min-width: 105px;
+    padding: 7px 7px 24px;
+    background: #fffdf7;
+    box-shadow: 2px 5px 10px #59446635;
+    transform: rotate(-2deg);
+    transition: transform .25s, box-shadow .25s;
+}
+
+.memory-photo:nth-child(2) {
+    transform: rotate(3deg) translateY(7px);
+}
+
+.memory-photo:nth-child(3) {
+    transform: rotate(-3deg) translateY(-3px);
+}
+
+.memory-photo:nth-child(4) {
+    transform: rotate(2deg) translateY(5px);
+}
+
+.memory-photo:nth-child(5) {
+    transform: rotate(-1deg);
+}
+
+.memory-photo:nth-child(6) {
+    transform: rotate(3deg);
+}
+
+.memory-photo:hover {
+    transform: rotate(0deg) scale(1.07) translateY(-5px);
+    z-index: 5;
+    box-shadow: 3px 10px 18px #59446645;
+}
+
+.memory-photo img {
+    display: block;
+    width: 100%;
+    height: 125px;
+    object-fit: cover;
+    background: #e6ddea;
+}
+
+.memory-photo:first-child img {
+    height: 145px;
+}
+
+.photo-date {
+    display: block;
+    text-align: center;
+    font-family: "Trebuchet MS", Arial, sans-serif;
+    font-size: 10px;
+    color: #74657a;
+    padding-top: 7px;
+    line-height: 1.3;
+}
+
+.memory-photo:before {
+    content: "";
+    position: absolute;
+    top: -9px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-5deg);
+    width: 36px;
+    height: 13px;
+    background: #e9c5d8;
+    opacity: .95;
+    z-index: 2;
+}
+
+.memory-photo:nth-child(2):before {
+    background: #d9b9e6;
+    transform: translateX(-50%) rotate(5deg);
+}
+
+.memory-photo:nth-child(3):before {
+    background: #c4d9d0;
+}
+
+.memory-photo:nth-child(4):before {
+    background: #c8d2ef;
+}
+
+.memory-photo:nth-child(5):before {
+    background: #f1d6a8;
+}
+
+.memory-photo:nth-child(6):before {
+    background: #d8c5e9;
+}
+
+.memory-card:before {
+    content: "📌";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    z-index: 4;
+    filter: drop-shadow(1px 2px 1px #59446635);
+}
+
+.memory-card:nth-child(even):before {
+    content: "📍";
+}
+
+.memory-caption {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin: 13px 5px 0;
+}
+
+.memory-caption p {
+    font-size: 12px;
+    color: #67556f;
+}
+
+.upload-btn {
+    background: #fff8ed;
+    color: #74547f;
+    border: 0;
+    border-radius: 20px;
+    padding: 9px 13px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 3px 7px #59446625;
+    white-space: nowrap;
+}
+
+.upload-btn:hover {
+    background: white;
+    color: #8a6395;
+    transform: translateY(-2px);
+}
+
+.memory-note {
+    font-family: "Trebuchet MS", Arial, sans-serif;
+    font-size: 11px;
+    color: #75627e;
+    margin: 10px 5px 0;
+    font-style: italic;
+}
+
+.memory-empty {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 45px 20px;
+    color: #75627e;
+    position: relative;
+    z-index: 2;
+}
+
+.memory-empty .emoji {
+    font-size: 43px;
+    margin-bottom: 12px;
+}
+
+.memory-empty h3 {
+    font-size: 22px;
+    margin-bottom: 8px;
+    color: #594466;
+}
+
+.memory-empty p {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #75627e;
+}
+
+/* MODALS */
+.file-input {
+    display: none;
+}
+
+.modal-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #142c2b88;
+    z-index: 20;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-bg.show {
+    display: flex;
+}
+
+.modal {
+    background: white;
+    border-radius: 17px;
+    padding: 25px;
+    width: 100%;
+    max-width: 430px;
+}
+
+.modal h3 {
+    color: #245b55;
+    margin-bottom: 17px;
+}
+
+.modal label {
+    font-size: 12px;
+    color: #617572;
+    display: block;
+    margin: 12px 0 5px;
+}
+
+.modal input,
+.modal textarea {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #dce7e3;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 13px;
+}
+
+.modal textarea {
+    min-height: 75px;
+    resize: vertical;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+    margin-top: 18px;
+}
+
+.modal-actions button {
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.save-btn {
+    background: #167d78;
+    color: white;
+}
+
+.cancel-btn {
+    background: #edf2f0;
+    color: #526762;
+}
+
+/* RESPONSIVE */
+@media(max-width: 900px) {
+    .navbar {
+        padding: 0 4%;
+    }
+
+    .nav-links {
+        gap: 15px;
+    }
+}
+
+@media(max-width: 750px) {
+    .navbar {
+        height: auto;
+        min-height: 75px;
+        padding: 18px 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .nav-links {
+        gap: 13px;
+        flex-wrap: wrap;
+    }
+
+    .nav-links a {
+        font-size: 13px;
+    }
+
+    .container {
+        padding: 0 15px;
+        margin-top: 25px;
+    }
+
+    .stats {
+        gap: 8px;
+    }
+
+    .stat {
+        padding: 13px;
+    }
+
+    .stat strong {
+        font-size: 20px;
+    }
+
+    .trip-list {
+        grid-template-columns: 1fr;
+    }
+
+    .memory-grid {
+        grid-template-columns: 1fr;
+        padding: 25px 15px 30px;
+        gap: 25px 10px;
+    }
+
+    .memory-card:nth-child(n) {
+        transform: none;
+    }
+
+    .memory-wall-heading h2 {
+        font-size: 23px;
+    }
+
+    .memory-wall-heading {
+        padding: 5px 7px 20px;
+    }
+}
+
+@media(max-width: 430px) {
+    .trip-card {
+        align-items: flex-start;
+    }
+
+    .trip-card img {
+        width: 70px;
+        height: 75px;
+    }
+
+    .section-heading h2 {
+        font-size: 19px;
+    }
+
+    .memory-grid {
+        border-width: 8px;
+        padding: 20px 8px;
+    }
+
+    .memory-photo {
+        width: 29%;
+        min-width: 85px;
+        padding: 5px 5px 20px;
+    }
+
+    .memory-photo img,
+    .memory-photo:first-child img {
+        height: 100px;
+    }
+
+    .memory-photo:first-child {
+        width: 34%;
+    }
+
+    .memory-caption {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .memory-card-top h3 {
+        font-size: 18px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- SAME NAVBAR AS HOME PAGE -->
+<nav class="navbar">
+    <div class="logo">
+        <span>✈</span> Waymate
+    </div>
+
+    <div class="nav-links">
+        <a href="home.html">Home</a>
+        <a href="explore.html">Explore</a>
+        <a href="trips.html" class="active">My Trips</a>
+        <a href="account.html">My Account</a>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="page-heading">
+        <h1>My Trips ✈</h1>
+        <p>Your travel plans, adventures and unforgettable memories.</p>
+    </div>
+
+    <section class="section">
+        <div class="section-heading">
+            <div>
+                <h2>Your Travel Plans</h2>
+                <p>Keep track of where you're heading next.</p>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <strong id="upcomingCount">0</strong>
+                <span>Upcoming Trips</span>
+            </div>
+            <div class="stat">
+                <strong id="completedCount">0</strong>
+                <span>Places Visited</span>
+            </div>
+            <div class="stat">
+                <strong id="savedCount">0</strong>
+                <span>Destinations Saved</span>
+            </div>
+        </div>
+
+        <div class="plan-panel">
+            <div class="tabs">
+                <button class="tab active" id="upcomingTab" onclick="showTrips('upcoming')">Upcoming Trips</button>
+                <button class="tab" id="completedTab" onclick="showTrips('completed')">Completed Trips</button>
+            </div>
+
+            <div class="trip-list" id="tripList"></div>
+
+            <div class="bucket-box">
+                <div class="bucket-top">
+                    <div>
+                        <h3>🌍 Places on my wishlist</h3>
+                        <p>Dream destinations for your next adventure.</p>
+                    </div>
+                    <button class="small-btn" onclick="addBucketPrompt()">+ Add place</button>
+                </div>
+                <div class="bucket-items" id="bucketItems"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section memory-section">
+        <div class="memory-grid" id="memoryGrid"></div>
+    </section>
+
+</div>
+
+<div class="modal-bg" id="editModal">
+    <div class="modal">
+        <h3>✏️ Edit Trip Details</h3>
+        <input type="hidden" id="editTripKey">
+
+        <label>Start Date</label>
+        <input type="date" id="editStart">
+
+        <label>End Date</label>
+        <input type="date" id="editEnd">
+
+        <label>Budget</label>
+        <input type="number" id="editBudget" placeholder="Enter your budget">
+
+        <label>Notes</label>
+        <textarea id="editNotes" placeholder="Add a note about your trip..."></textarea>
+
+        <div class="modal-actions">
+            <button class="cancel-btn" onclick="closeEdit()">Cancel</button>
+            <button class="save-btn" onclick="saveEdit()">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="photoInput" class="file-input" accept="image/*" multiple>
+
+<script>
+const STORAGE_KEY = "savedDestinations";
+const PHOTO_KEY = "waymateMagnetPhotos";
+const BUCKET_KEY = "waymateBucketList";
+
+let currentTab = "upcoming";
+let currentPhotoDestination = "";
+
+function readStorage(key, fallback) {
+    try {
+        const value = JSON.parse(localStorage.getItem(key));
+        return value ?? fallback;
+    } catch (e) {
+        return fallback;
+    }
+}
+
+function getTrips() {
+    const data = readStorage(STORAGE_KEY, []);
+    return Array.isArray(data) ? data : [];
+}
+
+function saveTrips(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function getPhotos() {
+    return readStorage(PHOTO_KEY, {});
+}
+
+function savePhotos(data) {
+    localStorage.setItem(PHOTO_KEY, JSON.stringify(data));
+}
+
+function getTripKey(trip) {
+    return String(trip.id ?? trip.name ?? "").toLowerCase();
+}
+
+function getPhotoKey(trip) {
+    return getTripKey(trip).replace(/[^a-z0-9]/g, "-");
+}
+
+function isCompleted(trip) {
+    return trip.visited === true ||
+           trip.status === "visited" ||
+           trip.travelWallStatus === "visited";
+}
+
+function getTripImage(trip) {
+    const photos = getPhotos();
+    return photos[getPhotoKey(trip)]?.cover ||
+           (trip.id !== undefined ? photos[String(trip.id)]?.cover : "") ||
+           trip.personalPhoto ||
+           trip.image ||
+           "";
+}
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;",
+        '"':"&quot;", "'":"&#39;"
+    })[char]);
+}
+
+function renderStats() {
+    const trips = getTrips();
+
+    document.getElementById("upcomingCount").textContent =
+        trips.filter(t => !isCompleted(t)).length;
+
+    document.getElementById("completedCount").textContent =
+        trips.filter(isCompleted).length;
+
+    document.getElementById("savedCount").textContent = trips.length;
+}
+
+function showTrips(tab) {
+    currentTab = tab;
+
+    document.getElementById("upcomingTab").classList.toggle("active", tab === "upcoming");
+    document.getElementById("completedTab").classList.toggle("active", tab === "completed");
+
+    renderTrips();
+}
+
+function renderTrips() {
+    const trips = getTrips();
+
+    const filtered = trips.filter(t =>
+        currentTab === "completed" ? isCompleted(t) : !isCompleted(t)
+    );
+
+    const list = document.getElementById("tripList");
+
+    if (!filtered.length) {
+        list.innerHTML = `
+            <div class="empty-state">
+                ${currentTab === "completed"
+                    ? "No completed trips yet. Your adventures will appear here! ✨"
+                    : "No upcoming trips yet. Time to plan your next adventure! 🌍"}
+            </div>`;
+        return;
+    }
+
+    list.innerHTML = filtered.map(trip => {
+        const key = escapeHTML(getTripKey(trip));
+        const image = escapeHTML(getTripImage(trip));
+        const name = escapeHTML(trip.name || "My Destination");
+        const date = trip.startDate || trip.date || "";
+        const budget = trip.budget ? "₹" + escapeHTML(trip.budget) : "";
+
+        return `
+        <div class="trip-card">
+            <img src="${image}" alt="${name}" onerror="this.style.display='none'">
+
+            <div class="trip-info">
+                <h3>${name}</h3>
+                <p>${date ? "📅 " + escapeHTML(date) : "Your next adventure"} ${budget ? " · " + budget : ""}</p>
+
+                <div class="trip-actions">
+                    <button class="small-btn" onclick="openEdit('${key}')">Edit details</button>
+
+                    <button class="small-btn" onclick="toggleVisited('${key}')">
+                        ${isCompleted(trip) ? "Move to upcoming" : "Mark visited"}
+                    </button>
+                </div>
+            </div>
+        </div>`;
+    }).join("");
+}
+
+function toggleVisited(key) {
+    const trips = getTrips();
+    const trip = trips.find(t => getTripKey(t) === key);
+
+    if (!trip) return;
+
+    const next = !isCompleted(trip);
+
+    trip.visited = next;
+    trip.status = next ? "visited" : "upcoming";
+    trip.travelWallStatus = next ? "visited" : "upcoming";
+
+    if (next && !trip.visitDate) {
+        trip.visitDate = new Date().toISOString().slice(0, 10);
+    }
+
+    saveTrips(trips);
+    renderAll();
+}
+
+function openEdit(key) {
+    const trip = getTrips().find(t => getTripKey(t) === key);
+    if (!trip) return;
+
+    document.getElementById("editTripKey").value = key;
+    document.getElementById("editStart").value = trip.startDate || "";
+    document.getElementById("editEnd").value = trip.endDate || "";
+    document.getElementById("editBudget").value = trip.budget || "";
+    document.getElementById("editNotes").value = trip.notes || "";
+
+    document.getElementById("editModal").classList.add("show");
+}
+
+function closeEdit() {
+    document.getElementById("editModal").classList.remove("show");
+}
+
+function saveEdit() {
+    const key = document.getElementById("editTripKey").value;
+    const trips = getTrips();
+    const trip = trips.find(t => getTripKey(t) === key);
+
+    if (!trip) return;
+
+    trip.startDate = document.getElementById("editStart").value;
+    trip.endDate = document.getElementById("editEnd").value;
+    trip.budget = document.getElementById("editBudget").value;
+    trip.notes = document.getElementById("editNotes").value;
+
+    saveTrips(trips);
+    closeEdit();
+    renderAll();
+}
+
+/* BUCKET LIST */
+function getBucketList() {
+    return readStorage(BUCKET_KEY, ["Ladakh", "Meghalaya", "Agra"]);
+}
+
+function renderBucketList() {
+    const items = getBucketList();
+
+    document.getElementById("bucketItems").innerHTML = items.length
+        ? items.map((item, index) => `
+            <span class="bucket-item">
+                ${escapeHTML(item)}
+                <button onclick="removeBucket(${index})">×</button>
+            </span>`).join("")
+        : `<span class="memory-note">Your wishlist is waiting for new adventures!</span>`;
+}
+
+function addBucketPrompt() {
+    const name = prompt("Which destination do you want to add?");
+    if (!name || !name.trim()) return;
+
+    const items = getBucketList();
+
+    if (!items.some(item => item.toLowerCase() === name.trim().toLowerCase())) {
+        items.push(name.trim());
+        localStorage.setItem(BUCKET_KEY, JSON.stringify(items));
+        renderBucketList();
+    }
+}
+
+function removeBucket(index) {
+    const items = getBucketList();
+    items.splice(index, 1);
+    localStorage.setItem(BUCKET_KEY, JSON.stringify(items));
+    renderBucketList();
+}
+
+/* READ PHOTO DATE/TIME FROM JPEG EXIF */
+function readExifDate(file) {
+    return new Promise(resolve => {
+        if (!file.type.includes("jpeg") && !file.type.includes("jpg")) {
+            resolve(null);
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function() {
+            try {
+                const view = new DataView(reader.result);
+
+                if (view.getUint16(0) !== 0xFFD8) {
+                    resolve(null);
+                    return;
+                }
+
+                let offset = 2;
+
+                while (offset < view.byteLength) {
+                    if (view.getUint8(offset) !== 0xFF) break;
+
+                    const marker = view.getUint8(offset + 1);
+                    const length = view.getUint16(offset + 2);
+
+                    if (marker === 0xE1) {
+                        const start = offset + 4;
+
+                        const signature = String.fromCharCode(
+                            view.getUint8(start),
+                            view.getUint8(start + 1),
+                            view.getUint8(start + 2),
+                            view.getUint8(start + 3)
+                        );
+
+                        if (signature !== "Exif") break;
+
+                        const tiff = start + 6;
+                        const little = view.getUint16(tiff) === 0x4949;
+                        const ifdOffset = view.getUint32(tiff + 4, little);
+                        const ifd = tiff + ifdOffset;
+                        const count = view.getUint16(ifd, little);
+
+                        let exifOffset = null;
+
+                        for (let i = 0; i < count; i++) {
+                            const entry = ifd + 2 + i * 12;
+                            const tag = view.getUint16(entry, little);
+
+                            if (tag === 0x8769) {
+                                exifOffset = view.getUint32(entry + 8, little);
+                                break;
+                            }
+                        }
+
+                        if (exifOffset !== null) {
+                            const exifIfd = tiff + exifOffset;
+                            const exifCount = view.getUint16(exifIfd, little);
+
+                            for (let i = 0; i < exifCount; i++) {
+                                const entry = exifIfd + 2 + i * 12;
+                                const tag = view.getUint16(entry, little);
+
+                                if (tag === 0x9003 || tag === 0x9004) {
+                                    const valueOffset = view.getUint32(entry + 8, little);
+                                    const pos = tiff + valueOffset;
+                                    let value = "";
+
+                                    for (let j = 0; j < 19; j++) {
+                                        value += String.fromCharCode(view.getUint8(pos + j));
+                                    }
+
+                                    resolve(value);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+                    offset += 2 + length;
+                }
+
+                resolve(null);
+            } catch (e) {
+                resolve(null);
+            }
+        };
+
+        reader.onerror = () => resolve(null);
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+function formatPhotoDate(dateString, fallbackDate) {
+    let date;
+
+    if (dateString) {
+        const parts = dateString.match(/^(\d{4}):(\d{2}):(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/);
+
+        if (parts) {
+            date = new Date(
+                Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]),
+                Number(parts[4]), Number(parts[5]), Number(parts[6])
+            );
+        }
+    }
+
+    if (!date || isNaN(date.getTime())) date = fallbackDate;
+
+    return {
+        date: date.toLocaleDateString("en-IN", {
+            day:"numeric", month:"short", year:"numeric"
+        }),
+        time: date.toLocaleTimeString("en-IN", {
+            hour:"2-digit", minute:"2-digit"
+        })
+    };
+}
+
+/* COMPRESS PHOTOS BEFORE SAVING */
+function compressPhoto(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            const img = new Image();
+
+            img.onload = () => {
+                const max = 1300;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > max || height > max) {
+                    const ratio = Math.min(max / width, max / height);
+                    width = Math.round(width * ratio);
+                    height = Math.round(height * ratio);
+                }
+
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+
+                resolve(canvas.toDataURL("image/jpeg", 0.78));
+            };
+
+            img.onerror = reject;
+            img.src = reader.result;
+        };
+
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+/* UPLOAD MULTIPLE PHOTOS */
+function uploadMemories(key) {
+    currentPhotoDestination = key;
+
+    const input = document.getElementById("photoInput");
+    input.value = "";
+    input.click();
+}
+
+document.getElementById("photoInput").addEventListener("change", async function(event) {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+
+    const trips = getTrips();
+    const trip = trips.find(t => getTripKey(t) === currentPhotoDestination);
+
+    if (!trip) return;
+
+    const allPhotos = getPhotos();
+    const photoKey = getPhotoKey(trip);
+
+    if (!allPhotos[photoKey]) allPhotos[photoKey] = { photos: [] };
+
+    if (!Array.isArray(allPhotos[photoKey].photos)) {
+        allPhotos[photoKey].photos = [];
+    }
+
+    const existing = allPhotos[photoKey].photos;
+    const remaining = Math.max(0, 6 - existing.length);
+
+    if (remaining === 0) {
+        alert("You can add up to 6 photos for each destination.");
+        return;
+    }
+
+    const selected = files.slice(0, remaining);
+
+    try {
+        for (const file of selected) {
+            if (!file.type.startsWith("image/")) continue;
+
+            if (file.size > 12 * 1024 * 1024) {
+                alert(file.name + " is too large. Please choose an image under 12 MB.");
+                continue;
+            }
+
+            const exifDate = await readExifDate(file);
+            const photoDate = formatPhotoDate(exifDate, new Date(file.lastModified));
+            const compressed = await compressPhoto(file);
+
+            existing.push({
+                src: compressed,
+                date: photoDate.date,
+                time: photoDate.time,
+                name: file.name
+            });
+        }
+
+        allPhotos[photoKey].photos = existing;
+        savePhotos(allPhotos);
+        renderMemoryWall();
+
+    } catch (error) {
+        alert("Unable to save these photos. Your browser storage may be full. Try fewer or smaller photos.");
+    }
+});
+
+/* MEMORY WALL */
+function renderMemoryWall() {
+    const trips = getTrips().filter(isCompleted);
+    const grid = document.getElementById("memoryGrid");
+    const allPhotos = getPhotos();
+
+    const wallHeading = `
+        <div class="memory-wall-heading">
+            <h2>My Travel Memory Wall ✨</h2>
+            <p>
+                Every picture has a story. Pin your favourite moments,
+                collect little memories and relive every adventure.
+            </p>
+            <span class="memory-sticker">📸 A wall full of places, people & memories</span>
+        </div>`;
+
+    if (!trips.length) {
+        grid.innerHTML = wallHeading + `
+            <div class="memory-empty">
+                <div class="emoji">📌 📷 ✈️</div>
+                <h3>Your wall is waiting for its first adventure!</h3>
+                <p>
+                    Mark a destination as visited in Your Travel Plans.<br>
+                    Then add your favourite photos and pin those memories here.
+                </p>
+            </div>`;
+        return;
+    }
+
+    grid.innerHTML = wallHeading + trips.map(trip => {
+        const key = getPhotoKey(trip);
+        const stored = allPhotos[key] || {};
+        const photos = Array.isArray(stored.photos) ? stored.photos : [];
+        const fallback = getTripImage(trip);
+        const name = escapeHTML(trip.name || "My Destination");
+        const visitDate = trip.visitDate || trip.startDate || trip.date || "";
+        const safeKey = escapeHTML(getTripKey(trip));
+
+        let photoTiles = "";
+
+        if (photos.length) {
+            photoTiles = photos.slice(0, 6).map(photo => `
+                <div class="memory-photo">
+                    <img src="${photo.src}" alt="Memory from ${name}">
+                    <span class="photo-date">
+                        ${escapeHTML(photo.date)} · ${escapeHTML(photo.time)}
+                    </span>
+                </div>
+            `).join("");
+
+        } else if (fallback) {
+            photoTiles = `
+                <div class="memory-photo" style="width:55%">
+                    <img src="${escapeHTML(fallback)}" alt="${name}"
+                         onerror="this.style.display='none'">
+                    <span class="photo-date">A memory from ${name}</span>
+                </div>`;
+
+        } else {
+            photoTiles = `
+                <p class="memory-note">Upload your favourite photos to start this collage.</p>`;
+        }
+
+        return `
+        <article class="memory-card">
+            <div class="memory-card-top">
+                <h3>📍 ${name}</h3>
+                <span>${visitDate ? "Visited · " + escapeHTML(visitDate) : "A special journey"}</span>
+            </div>
+
+            <div class="memory-collage">
+                ${photoTiles}
+            </div>
+
+            <div class="memory-caption">
+                <p>${photos.length
+                    ? photos.length + " moments pinned to this wall ✨"
+                    : "Your first memory starts here 💌"}</p>
+
+                <button class="upload-btn" onclick="uploadMemories('${safeKey}')">
+                    ${photos.length ? "＋ Add more photos" : "📸 Pin your photos"}
+                </button>
+            </div>
+
+            <p class="memory-note">
+                ${photos.length < 2
+                    ? "Add more photos to make this memory collage come alive."
+                    : "A little collection of your " + name + " memories."}
+            </p>
+        </article>`;
+    }).join("");
+}
+
+/* RENDER EVERYTHING */
+function renderAll() {
+    renderStats();
+    renderTrips();
+    renderBucketList();
+    renderMemoryWall();
+}
+
+renderAll();
+</script>
+
+</body>
+</html>

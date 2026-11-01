@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,6 +9,119 @@
     <title>Waymate - Destination</title>
 
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* MAPS AND DESTINATION BUTTONS */
+
+        .destination-buttons {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .maps-button {
+            background: #0b6670;
+            color: white;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .maps-button:hover {
+            background: #087f78;
+            transform: translateY(-2px);
+        }
+
+        /* LIVE WEATHER */
+
+        .live-weather {
+            margin-top: 12px;
+        }
+
+        .weather-main {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 15px;
+        }
+
+        .weather-icon {
+            font-size: 42px;
+        }
+
+        .weather-temperature {
+            font-size: 32px;
+            font-weight: 700;
+            color: #087f78;
+        }
+
+        .weather-condition {
+            font-size: 13px;
+            color: #718987;
+        }
+
+        .weather-extra {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .weather-extra-item {
+            background: #f1f8f6;
+            border-radius: 10px;
+            padding: 12px 8px;
+            text-align: center;
+        }
+
+        .weather-extra-item span {
+            display: block;
+            font-size: 11px;
+            color: #718987;
+            margin-bottom: 5px;
+        }
+
+        .weather-extra-item strong {
+            font-size: 13px;
+            color: #203b3a;
+        }
+
+        .weather-updated {
+            display: block;
+            font-size: 10px;
+            color: #82918f;
+            margin-top: 12px;
+        }
+
+        .weather-loading {
+            color: #718987;
+            font-size: 13px;
+        }
+
+        @media(max-width:500px) {
+            .weather-extra {
+                grid-template-columns: 1fr;
+            }
+
+            .weather-extra-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-align: left;
+                padding: 10px 14px;
+            }
+
+            .weather-extra-item span {
+                margin-bottom: 0;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -30,24 +144,20 @@
 
         </nav>
 
-
         <main class="destination-container">
 
-            <a href="#" class="back-button" id="backButton">
-                ← Back
+            <a href="explore.html" class="back-button" id="backButton">
+                ← Back to Explore
             </a>
 
             <div id="destinationContent"></div>
 
         </main>
 
-
         <footer class="footer">
-
             <p>
                 Your journey, our recommendation.
             </p>
-
         </footer>
 
     </div>
@@ -55,26 +165,51 @@
 
     <script>
 
-        // ==================================================
-        // SELECTED DESTINATION
-        // ==================================================
+        // GET SELECTED DESTINATION
 
         const selectedDestination =
-            JSON.parse(
-                localStorage.getItem("selectedDestination")
-            );
+            JSON.parse(localStorage.getItem("selectedDestination"));
 
 
-        // ==================================================
-        // DESTINATION DETAILS
-        // ==================================================
+        // GET DESTINATION SOURCE
+
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const destinationSource =
+            urlParams.get("source") ||
+            localStorage.getItem("destinationSource") ||
+            "explore";
+
+        const isHomeDestination =
+            destinationSource === "home";
+
+
+        // DYNAMIC BACK BUTTON
+
+        const backButton =
+            document.getElementById("backButton");
+
+        if (isHomeDestination) {
+
+            backButton.href = "home.html";
+            backButton.innerHTML = "← Back to home page";
+
+        } else {
+
+            backButton.href = "explore.html";
+            backButton.innerHTML = "← Back to Explore";
+
+        }
+
+
+        // DESTINATION INFORMATION AND COORDINATES
 
         const destinationDetails = {
 
             "Goa": {
-
-                location:
-                    "Goa, India",
+                location: "Goa, India",
+                latitude: 15.4909,
+                longitude: 73.8278,
 
                 weather:
                     "Warm and tropical. Summers are hot, while winters are pleasant.",
@@ -94,14 +229,13 @@
                     "Basilica of Bom Jesus",
                     "Dudhsagar Falls"
                 ]
-
             },
 
 
             "Jaipur": {
-
-                location:
-                    "Jaipur, Rajasthan, India",
+                location: "Jaipur, Rajasthan, India",
+                latitude: 26.9124,
+                longitude: 75.7873,
 
                 weather:
                     "Generally warm and dry. Winters are cooler and comfortable for sightseeing.",
@@ -121,14 +255,13 @@
                     "Jantar Mantar",
                     "Nahargarh Fort"
                 ]
-
             },
 
 
             "Kerala Backwaters": {
-
-                location:
-                    "Kerala, India",
+                location: "Alleppey, Kerala, India",
+                latitude: 9.4981,
+                longitude: 76.3388,
 
                 weather:
                     "Tropical and humid with warm temperatures throughout most of the year.",
@@ -148,14 +281,13 @@
                     "Houseboat Cruises",
                     "Marari Beach"
                 ]
-
             },
 
 
             "Manali": {
-
-                location:
-                    "Himachal Pradesh, India",
+                location: "Manali, Himachal Pradesh, India",
+                latitude: 32.2432,
+                longitude: 77.1892,
 
                 weather:
                     "Cool mountain climate. Winters are cold and summers are pleasant.",
@@ -175,14 +307,13 @@
                     "Mall Road",
                     "Old Manali"
                 ]
-
             },
 
 
             "Agra": {
-
-                location:
-                    "Uttar Pradesh, India",
+                location: "Agra, Uttar Pradesh, India",
+                latitude: 27.1767,
+                longitude: 78.0081,
 
                 weather:
                     "Hot summers and cooler winters. Winters are generally comfortable for sightseeing.",
@@ -202,14 +333,13 @@
                     "Itmad-ud-Daulah's Tomb",
                     "Fatehpur Sikri"
                 ]
-
             },
 
 
             "Hampi": {
-
-                location:
-                    "Karnataka, India",
+                location: "Hampi, Karnataka, India",
+                latitude: 15.3350,
+                longitude: 76.4600,
 
                 weather:
                     "Mostly warm and dry. Cooler months are more comfortable for exploring.",
@@ -229,14 +359,13 @@
                     "Lotus Mahal",
                     "Matanga Hill"
                 ]
-
             },
 
 
             "Amritsar": {
-
-                location:
-                    "Punjab, India",
+                location: "Amritsar, Punjab, India",
+                latitude: 31.6340,
+                longitude: 74.8723,
 
                 weather:
                     "Hot summers and cold winters with pleasant weather during spring and autumn.",
@@ -256,14 +385,13 @@
                     "Partition Museum",
                     "Gobindgarh Fort"
                 ]
-
             },
 
 
             "Rishikesh": {
-
-                location:
-                    "Uttarakhand, India",
+                location: "Rishikesh, Uttarakhand, India",
+                latitude: 30.0869,
+                longitude: 78.2676,
 
                 weather:
                     "Generally warm with pleasant winters. Monsoon brings heavy rainfall.",
@@ -283,14 +411,13 @@
                     "Neer Garh Waterfall",
                     "Beatles Ashram"
                 ]
-
             },
 
 
             "Ladakh": {
-
-                location:
-                    "Ladakh, India",
+                location: "Leh, Ladakh, India",
+                latitude: 34.1526,
+                longitude: 77.5771,
 
                 weather:
                     "Cold and dry mountain climate with strong temperature changes between day and night.",
@@ -310,14 +437,13 @@
                     "Magnetic Hill",
                     "Khardung La"
                 ]
-
             },
 
 
             "Meghalaya": {
-
-                location:
-                    "Meghalaya, India",
+                location: "Shillong, Meghalaya, India",
+                latitude: 25.5788,
+                longitude: 91.8933,
 
                 weather:
                     "Cool and pleasant in many areas with frequent rainfall, especially during monsoon.",
@@ -337,15 +463,12 @@
                     "Dawki",
                     "Mawsmai Cave"
                 ]
-
             }
 
         };
 
 
-        // ==================================================
         // DESTINATION IMAGES
-        // ==================================================
 
         const destinationImages = {
 
@@ -361,16 +484,14 @@
             "Kerala Backwaters":
                 "https://t3.ftcdn.net/jpg/09/46/17/06/360_F_946170699_pspnWARcAaQv9ucK7NAdNZ9whmUwGcA2.jpg",
 
-            // Updated Manali image
             "Manali":
-                "https://www.sostravelhouse.com/public/uploads/images/post/67fe2ee9cc351.webp",
+                "https://wallpaperaccess.com/full/2185184.jpg",
 
             "Agra":
                 "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSty8TwBsTy1y7rhBDAiIflVsttO-jemLqAb1wrhzfajA&s=10",
 
-            // Updated Hampi image
             "Hampi":
-                "https://commons.wikimedia.org/wiki/Special:Redirect/file/Hampi_virupaksha_temple.jpg",
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmrNHyqqCryhoyNW2chw_uGomY0ZURf6_9GoqMCwTQzWHffLwJbvwuCuY&s=10",
 
             "Rishikesh":
                 "https://www.sterlingholidays.com/blog/wp-content/uploads/2025/12/niloy-banerjee-w2uhp5VrF8M-unsplash-scaled.jpg",
@@ -384,178 +505,429 @@
         };
 
 
-        // ==================================================
-        // DEFAULT RECOMMENDED DAYS
-        // ==================================================
+        // GOOGLE MAPS FUNCTION
 
-        const DEFAULT_DAYS = {
+        function openInMaps() {
 
-            "Goa": 3,
-
-            "Manali": 4,
-
-            "Jaipur": 3,
-
-            "Kerala Backwaters": 4,
-
-            "Agra": 2,
-
-            "Hampi": 3,
-
-            "Amritsar": 2,
-
-            "Rishikesh": 3,
-
-            "Ladakh": 5,
-
-            "Meghalaya": 4
-
-        };
-
-
-        // ==================================================
-        // GET RECOMMENDED DAYS
-        // ==================================================
-
-        function getRecommendedDays(destination) {
-
-            if (!destination) {
-
-                return 0;
-
+            if (!selectedDestination) {
+                return;
             }
 
+            const details =
+                destinationDetails[selectedDestination.name];
 
-            const apiDays =
-                Number(
-                    destination.recommended_days ??
-                    destination.number_of_days ??
-                    destination.duration ??
-                    destination.days ??
-                    0
+            if (!details) {
+                alert("Location information is not available.");
+                return;
+            }
+
+            const destinationCoordinates =
+                `${details.latitude},${details.longitude}`;
+
+            const fallbackUrl =
+                `https://www.google.com/maps/dir/?api=1&destination=${destinationCoordinates}&travelmode=driving`;
+
+            // Open Maps immediately.
+            // This also avoids browser popup blockers.
+
+            const mapWindow = window.open(
+                fallbackUrl,
+                "_blank"
+            );
+
+            if (!mapWindow) {
+                window.location.href = fallbackUrl;
+                return;
+            }
+
+            // Try to get the user's current location.
+
+            if (navigator.geolocation) {
+
+                navigator.geolocation.getCurrentPosition(
+
+                    function(position) {
+
+                        const userLatitude =
+                            position.coords.latitude;
+
+                        const userLongitude =
+                            position.coords.longitude;
+
+                        const origin =
+                            `${userLatitude},${userLongitude}`;
+
+                        const mapsUrl =
+                            `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destinationCoordinates}&travelmode=driving`;
+
+                        mapWindow.location.href = mapsUrl;
+
+                    },
+
+                    function(error) {
+
+                        // If location permission is denied,
+                        // Maps still opens with the destination.
+
+                        console.log(
+                            "Current location unavailable. Opening destination only."
+                        );
+
+                    },
+
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+
                 );
 
-
-            if (apiDays > 0) {
-
-                return apiDays;
-
             }
-
-
-            return DEFAULT_DAYS[
-                destination.name
-            ] || 0;
 
         }
 
 
-        // ==================================================
-        // SHOW DESTINATION
-        // ==================================================
+        // WEATHER CONDITION BASED ON WEATHER CODE
 
-        function showDestination() {
+        function getWeatherCondition(code, isDay) {
 
-            const container =
-                document.getElementById(
-                    "destinationContent"
-                );
+            const weatherConditions = {
+
+                0: {
+                    text: "Clear Sky",
+                    icon: isDay ? "☀️" : "🌙"
+                },
+
+                1: {
+                    text: "Mainly Clear",
+                    icon: isDay ? "🌤️" : "🌙"
+                },
+
+                2: {
+                    text: "Partly Cloudy",
+                    icon: "⛅"
+                },
+
+                3: {
+                    text: "Overcast",
+                    icon: "☁️"
+                },
+
+                45: {
+                    text: "Foggy",
+                    icon: "🌫️"
+                },
+
+                48: {
+                    text: "Depositing Rime Fog",
+                    icon: "🌫️"
+                },
+
+                51: {
+                    text: "Light Drizzle",
+                    icon: "🌦️"
+                },
+
+                53: {
+                    text: "Moderate Drizzle",
+                    icon: "🌦️"
+                },
+
+                55: {
+                    text: "Heavy Drizzle",
+                    icon: "🌧️"
+                },
+
+                61: {
+                    text: "Slight Rain",
+                    icon: "🌧️"
+                },
+
+                63: {
+                    text: "Moderate Rain",
+                    icon: "🌧️"
+                },
+
+                65: {
+                    text: "Heavy Rain",
+                    icon: "🌧️"
+                },
+
+                71: {
+                    text: "Slight Snowfall",
+                    icon: "🌨️"
+                },
+
+                73: {
+                    text: "Moderate Snowfall",
+                    icon: "❄️"
+                },
+
+                75: {
+                    text: "Heavy Snowfall",
+                    icon: "❄️"
+                },
+
+                77: {
+                    text: "Snow Grains",
+                    icon: "🌨️"
+                },
+
+                80: {
+                    text: "Rain Showers",
+                    icon: "🌦️"
+                },
+
+                81: {
+                    text: "Moderate Rain Showers",
+                    icon: "🌧️"
+                },
+
+                82: {
+                    text: "Heavy Rain Showers",
+                    icon: "⛈️"
+                },
+
+                85: {
+                    text: "Snow Showers",
+                    icon: "🌨️"
+                },
+
+                86: {
+                    text: "Heavy Snow Showers",
+                    icon: "❄️"
+                },
+
+                95: {
+                    text: "Thunderstorm",
+                    icon: "⛈️"
+                },
+
+                96: {
+                    text: "Thunderstorm with Hail",
+                    icon: "⛈️"
+                },
+
+                99: {
+                    text: "Heavy Thunderstorm with Hail",
+                    icon: "⛈️"
+                }
+
+            };
+
+            return weatherConditions[code] || {
+                text: "Weather information unavailable",
+                icon: "🌡️"
+            };
+
+        }
 
 
-            if (!container) {
+        // FETCH LIVE WEATHER
 
-                return;
-
-            }
-
-
-            // ------------------------------------------
-            // DESTINATION NOT FOUND
-            // ------------------------------------------
+        async function loadLiveWeather() {
 
             if (!selectedDestination) {
+                return;
+            }
 
-                container.innerHTML = `
+            const details =
+                destinationDetails[selectedDestination.name];
 
-                    <div class="not-found">
+            const weatherContainer =
+                document.getElementById("weatherContent");
 
-                        <h2>
-                            Destination not found
-                        </h2>
+            if (!details || !weatherContainer) {
+                return;
+            }
 
-                        <p>
-                            Please go back to Explore
-                            and select a destination.
-                        </p>
+            weatherContainer.innerHTML = `
+                <p class="weather-loading">
+                    Loading current weather...
+                </p>
+            `;
+
+            try {
+
+                const weatherUrl =
+                    `https://api.open-meteo.com/v1/forecast?latitude=${details.latitude}&longitude=${details.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m&timezone=auto`;
+
+                const response = await fetch(weatherUrl);
+
+                if (!response.ok) {
+                    throw new Error("Weather data could not be loaded.");
+                }
+
+                const data = await response.json();
+
+                const current = data.current;
+
+                if (!current) {
+                    throw new Error("Current weather is unavailable.");
+                }
+
+                const condition = getWeatherCondition(
+                    current.weather_code,
+                    current.is_day
+                );
+
+                const temperature =
+                    Math.round(current.temperature_2m);
+
+                const feelsLike =
+                    Math.round(current.apparent_temperature);
+
+                const humidity =
+                    current.relative_humidity_2m;
+
+                const windSpeed =
+                    current.wind_speed_10m;
+
+                weatherContainer.innerHTML = `
+
+                    <div class="live-weather">
+
+                        <div class="weather-main">
+
+                            <div class="weather-icon">
+                                ${condition.icon}
+                            </div>
+
+                            <div>
+                                <div class="weather-temperature">
+                                    ${temperature}°C
+                                </div>
+
+                                <div class="weather-condition">
+                                    ${condition.text}
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="weather-extra">
+
+                            <div class="weather-extra-item">
+                                <span>🌡️ Feels Like</span>
+                                <strong>${feelsLike}°C</strong>
+                            </div>
+
+                            <div class="weather-extra-item">
+                                <span>💧 Humidity</span>
+                                <strong>${humidity}%</strong>
+                            </div>
+
+                            <div class="weather-extra-item">
+                                <span>💨 Wind Speed</span>
+                                <strong>${windSpeed} km/h</strong>
+                            </div>
+
+                        </div>
+
+                        <span class="weather-updated">
+                            Live weather · ${current.time.replace("T", " ")}
+                            · ${details.location}
+                        </span>
 
                     </div>
 
                 `;
 
-                return;
+            } catch (error) {
+
+                console.error("Weather error:", error);
+
+                weatherContainer.innerHTML = `
+                    <p class="weather-loading">
+                        Weather information is currently unavailable.
+                        Please check your internet connection and try again.
+                    </p>
+                `;
 
             }
 
+        }
 
-            // ------------------------------------------
-            // GET DESTINATION DETAILS
-            // ------------------------------------------
+
+        // SHOW DESTINATION DETAILS
+
+        function showDestination() {
+
+            const container =
+                document.getElementById("destinationContent");
+
+
+            if (!selectedDestination) {
+
+                container.innerHTML = `
+                    <div class="not-found">
+                        <h2>Destination not found</h2>
+                        <p>
+                            Please go back and select a destination.
+                        </p>
+                    </div>
+                `;
+
+                return;
+            }
+
 
             const details =
-                destinationDetails[
-                    selectedDestination.name
-                ];
+                destinationDetails[selectedDestination.name];
 
 
             if (!details) {
 
                 container.innerHTML = `
-
                     <div class="not-found">
-
-                        <h2>
-                            Destination details unavailable
-                        </h2>
-
+                        <h2>Destination details unavailable</h2>
                         <p>
-                            Please go back to Explore
-                            and select another destination.
+                            Please go back and select another destination.
                         </p>
-
                     </div>
-
                 `;
 
                 return;
-
             }
 
 
-            // ------------------------------------------
-            // DESTINATION IMAGE
-            // ------------------------------------------
-
             const destinationImage =
-                destinationImages[
-                    selectedDestination.name
-                ] ||
-                selectedDestination.image ||
-                "";
+                destinationImages[selectedDestination.name] ||
+                selectedDestination.image;
 
 
-            // ------------------------------------------
-            // RECOMMENDED DAYS
-            // ------------------------------------------
+            // BUDGET AND DURATION
 
-            const recommendedDays =
-                getRecommendedDays(
-                    selectedDestination
-                );
+            const tripDetailsHTML = !isHomeDestination ? `
+
+                <div class="detail-box">
+
+                    <h3>💰 Budget</h3>
+
+                    <p>
+                        ${selectedDestination.budget != null
+                            ? "Approximately ₹" + Number(selectedDestination.budget).toLocaleString("en-IN")
+                            : "Not available"}
+                    </p>
+
+                </div>
 
 
-            // ==================================================
-            // CREATE DESTINATION PAGE
-            // ==================================================
+                <div class="detail-box">
+
+                    <h3>📅 Recommended Duration</h3>
+
+                    <p>
+                        ${selectedDestination.days != null
+                            ? selectedDestination.days + " days"
+                            : "Not available"}
+                    </p>
+
+                </div>
+
+            ` : "";
+
 
             container.innerHTML = `
 
@@ -572,21 +944,17 @@
                             ${selectedDestination.name}
                         </h1>
 
-
                         <div class="destination-location">
                             📍 ${details.location}
                         </div>
 
-
                         <div class="destination-type">
-                            ${selectedDestination.type}
+                            ${selectedDestination.type || ""}
                         </div>
 
-
                         <p class="destination-description">
-                            ${selectedDestination.description}
+                            ${selectedDestination.description || ""}
                         </p>
-
 
                         <div class="destination-buttons">
 
@@ -598,6 +966,13 @@
                                 ♡ Save Destination
                             </button>
 
+                            <button
+                                class="maps-button"
+                                onclick="openInMaps()"
+                            >
+                                📍 Open in Maps
+                            </button>
+
                         </div>
 
                     </div>
@@ -607,105 +982,57 @@
 
                 <section class="details-grid">
 
+                    ${tripDetailsHTML}
 
-                    <!-- BUDGET -->
 
                     <div class="detail-box">
 
-                        <h3>
-                            💰 Budget
-                        </h3>
+                        <h3>🌤️ Live Weather</h3>
+
+                        <div id="weatherContent">
+                            <p class="weather-loading">
+                                Loading current weather...
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="detail-box">
+
+                        <h3>⭐ Rating</h3>
 
                         <p>
-                            Approximately ₹${Number(
-                                selectedDestination.budget || 0
-                            ).toLocaleString("en-IN")}
+                            ${selectedDestination.rating != null
+                                ? selectedDestination.rating + " / 5"
+                                : "Not available"}
                         </p>
 
                     </div>
 
 
-                    <!-- RECOMMENDED DURATION -->
+                    ${!isHomeDestination ? `
 
                     <div class="detail-box">
 
-                        <h3>
-                            📅 Recommended Duration
-                        </h3>
-
-                        <p id="recommendedDuration">
-
-                            ${
-                                recommendedDays > 0
-                                    ? recommendedDays + " days"
-                                    : "Not available"
-                            }
-
-                        </p>
-
-                    </div>
-
-
-                    <!-- WEATHER -->
-
-                    <div class="detail-box">
-
-                        <h3>
-                            ☀️ Weather
-                        </h3>
-
-                        <p>
-                            ${details.weather}
-                        </p>
-
-                    </div>
-
-
-                    <!-- RATING -->
-
-                    <div class="detail-box">
-
-                        <h3>
-                            ⭐ Rating
-                        </h3>
-
-                        <p>
-                            ${selectedDestination.rating || 0} / 5
-                        </p>
-
-                    </div>
-
-
-                    <!-- PACKING ESSENTIALS -->
-
-                    <div class="detail-box">
-
-                        <h3>
-                            🎒 Packing Essentials
-                        </h3>
+                        <h3>🎒 Packing Essentials</h3>
 
                         <ul class="info-list">
 
-                            ${details.packing.map(
-                                item => `
-                                    <li>
-                                        ${item}
-                                    </li>
-                                `
-                            ).join("")}
+                            ${details.packing.map(item => `
+                                <li>${item}</li>
+                            `).join("")}
 
                         </ul>
 
                     </div>
 
+                    ` : ""}
 
-                    <!-- LOCATION -->
 
                     <div class="detail-box">
 
-                        <h3>
-                            📍 Location
-                        </h3>
+                        <h3>📍 Location</h3>
 
                         <p>
                             ${details.location}
@@ -713,11 +1040,8 @@
 
                     </div>
 
-
                 </section>
 
-
-                <!-- FAMOUS SPOTS -->
 
                 <section class="famous-spots">
 
@@ -727,13 +1051,9 @@
 
                     <ul>
 
-                        ${details.spots.map(
-                            spot => `
-                                <li>
-                                    ${spot}
-                                </li>
-                            `
-                        ).join("")}
+                        ${details.spots.map(spot => `
+                            <li>${spot}</li>
+                        `).join("")}
 
                     </ul>
 
@@ -742,32 +1062,25 @@
             `;
 
 
-            // Update Save button after
-            // destination content is created.
-
             updateSaveButton();
+
+            loadLiveWeather();
 
         }
 
 
-        // ==================================================
         // SAVE / UNSAVE DESTINATION
-        // ==================================================
 
         function toggleSave() {
 
             if (!selectedDestination) {
-
                 return;
-
             }
 
 
             let savedDestinations =
                 JSON.parse(
-                    localStorage.getItem(
-                        "savedDestinations"
-                    )
+                    localStorage.getItem("savedDestinations")
                 ) || [];
 
 
@@ -781,8 +1094,6 @@
 
             if (alreadySaved) {
 
-                // Remove destination
-
                 savedDestinations =
                     savedDestinations.filter(
                         destination =>
@@ -790,11 +1101,7 @@
                             selectedDestination.name
                     );
 
-            }
-
-            else {
-
-                // Save destination
+            } else {
 
                 savedDestinations.push(
                     selectedDestination
@@ -805,9 +1112,7 @@
 
             localStorage.setItem(
                 "savedDestinations",
-                JSON.stringify(
-                    savedDestinations
-                )
+                JSON.stringify(savedDestinations)
             );
 
 
@@ -816,30 +1121,22 @@
         }
 
 
-        // ==================================================
         // UPDATE SAVE BUTTON
-        // ==================================================
 
         function updateSaveButton() {
 
             const button =
-                document.getElementById(
-                    "saveButton"
-                );
+                document.getElementById("saveButton");
 
 
             if (!button) {
-
                 return;
-
             }
 
 
             const savedDestinations =
                 JSON.parse(
-                    localStorage.getItem(
-                        "savedDestinations"
-                    )
+                    localStorage.getItem("savedDestinations")
                 ) || [];
 
 
@@ -853,119 +1150,26 @@
 
             if (isSaved) {
 
-                button.innerHTML =
-                    "✓ Saved";
+                button.innerHTML = "✓ Saved";
 
-                button.classList.add(
-                    "saved"
-                );
+                button.classList.add("saved");
 
-            }
+            } else {
 
-            else {
+                button.innerHTML = "♡ Save Destination";
 
-                button.innerHTML =
-                    "♡ Save Destination";
-
-                button.classList.remove(
-                    "saved"
-                );
+                button.classList.remove("saved");
 
             }
 
         }
 
 
-        // ==================================================
-        // SHOW DESTINATION
-        // ==================================================
+        // DISPLAY DESTINATION
 
         showDestination();
 
     </script>
 
-
-    <!-- ==================================================
-         BACK BUTTON
-         ================================================== -->
-
-    <script>
-
-        const backButton =
-            document.getElementById(
-                "backButton"
-            );
-
-
-        if (backButton) {
-
-            const referrer =
-                document.referrer || "";
-
-
-            const destinationSource =
-                localStorage.getItem(
-                    "destinationSource"
-                );
-
-
-            // ------------------------------------------
-            // Opened from Explore
-            // ------------------------------------------
-
-            if (
-                referrer.includes(
-                    "explore.html"
-                )
-            ) {
-
-                backButton.href =
-                    "explore.html";
-
-            }
-
-
-            // ------------------------------------------
-            // Opened from Home
-            // ------------------------------------------
-
-            else if (
-                referrer.includes(
-                    "home.html"
-                )
-            ) {
-
-                backButton.href =
-                    "home.html";
-
-            }
-
-
-            // ------------------------------------------
-            // Fallback: stored source
-            // ------------------------------------------
-
-            else if (
-                destinationSource === "explore"
-            ) {
-
-                backButton.href =
-                    "explore.html";
-
-            }
-
-
-            else {
-
-                backButton.href =
-                    "home.html";
-
-            }
-
-        }
-
-    </script>
-
 </body>
-
 </html>
