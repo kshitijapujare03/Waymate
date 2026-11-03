@@ -26,9 +26,19 @@ def get_popular_destinations(user_id=None):
                 rating,
                 image_url
             FROM destinations
-            ORDER BY RAND()
-            LIMIT 4
+            WHERE is_popular = 1
+            ORDER BY rating DESC, id ASC
+            LIMIT 10
         """
+
+        cursor.execute(query)
+
+        destinations = cursor.fetchall()
+
+        cursor.close()
+        connection.close()
+
+        return destinations
 
         cursor.execute(query)
 
