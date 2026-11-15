@@ -46,3 +46,47 @@ def verify_user(email, password):
         return user
 
     return None
+
+def get_user_profile(user_id):
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+        cursor.execute(
+            """
+            SELECT id, full_name, email, mobile_number, photo_url
+            FROM users
+            WHERE id = %s
+            """,
+            (user_id,)
+        )
+
+        return cursor.fetchone()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+
+def update_user_profile(user_id, full_name, email, mobile_number):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute(
+            """
+            UPDATE users
+            SET full_name = %s,
+                email = %s,
+                mobile_number = %s
+            WHERE id = %s
+            """,
+            (full_name, email, mobile_number, user_id)
+        )
+
+        connection.commit()
+        return cursor.rowcount >= 0
+
+    finally:
+        cursor.close()
+        connection.close()

@@ -1,924 +1,641 @@
+
 const API_URL = "http://127.0.0.1:5000";
 
 let destinations = [];
-
+let filteredDestinations = [];
 let currentPage = 1;
 
 const cardsPerPage = 6;
 
+// --------------------------------------------------
+// HTML SAFETY
+// --------------------------------------------------
 
-// ==================================================
-// DEFAULT RECOMMENDED DAYS
-// ==================================================
-
-const DEFAULT_DAYS = {
-    "Goa": 3,
-    "Manali": 4,
-    "Jaipur": 3,
-    "Kerala Backwaters": 4,
-    "Agra": 2,
-    "Hampi": 3,
-    "Amritsar": 2,
-    "Rishikesh": 3,
-    "Ladakh": 5,
-    "Meghalaya": 4
-};
-
-
-// ==================================================
-// IMAGE OVERRIDES
-// ==================================================
-
-const IMAGE_OVERRIDES = {
-    "Manali":
-        "https://www.sostravelhouse.com/public/uploads/images/post/67fe2ee9cc351.webp",
-
-    "Hampi":
-        "https://commons.wikimedia.org/wiki/Special:Redirect/file/Hampi_virupaksha_temple.jpg"
-};
-
-
-// ==================================================
-// GET RECOMMENDED DAYS
-// ==================================================
-
-function getRecommendedDays(destination) {
-
-    const apiDays = Number(
-        destination.recommended_days ??
-        destination.days ??
-        destination.duration ??
-        destination.number_of_days ??
-        0
-    );
-
-    return apiDays > 0
-        ? apiDays
-        : (DEFAULT_DAYS[destination.name] || 0);
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[character]);
 }
 
+// --------------------------------------------------
+// FORMAT BUDGET
+// --------------------------------------------------
 
-// ==================================================
-// FILTERED DESTINATIONS
-// ==================================================
+function formatBudget(value) {
+    const amount = Number(value);
 
-let filteredDestinations = [];
+    if (!Number.isFinite(amount)) {
+        return "Not specified";
+    }
 
+    return "₹" + amount.toLocaleString("en-IN", {
+        maximumFractionDigits: 0
+    });
+}
 
-// ==================================================
-// LOAD DESTINATIONS FROM BACKEND
-// ==================================================
+// --------------------------------------------------
+// LOAD DESTINATIONS FROM MYSQL THROUGH FLASK
+// --------------------------------------------------
 
 async function loadDestinations() {
+    const grid = document.getElementById("destinationGrid");
+
+    if (!grid) return;
+
+    grid.innerHTML = "<p>Loading destinations...</p>";
 
     try {
-
-        const response = await fetch(
-            `${API_URL}/api/destinations`
-        );
+        const response = await fetch(`${API_URL}/api/destinations`);
 
         if (!response.ok) {
-
-            throw new Error(
-                `Server returned ${response.status}`
-            );
-
+            throw new Error("Unable to fetch destinations.");
         }
 
         const result = await response.json();
 
+        const records = Array.isArray(result)
+            ? result
+            : result.destinations || result.data || [];
 
-        // Flask API can return:
-        // [ ... ]
-        // OR
-        // { destinations: [ ... ] }
-        // OR
-        // { data: [ ... ] }
+        destinations = records.map(destination => ({
+            ...destination,
 
-        const apiData =
-            Array.isArray(result)
-                ? result
-                : (
-                    result.destinations ||
-                    result.data ||
-                    []
-                );
+            id: destination.id ?? destination.destination_id,
+            name: destination.name ?? destination.destination_name ?? "Unknown destination",
+            type: destination.destination_type ?? destination.type ?? "Other",
 
+            description: destination.description || "",
 
-        // ==================================================
-        // CONVERT BACKEND DATA
-        // ==================================================
+            budget_min: destination.budget_min == null
+                ? NaN
+                : Number(destination.budget_min),
 
-        destinations = apiData.map(
-            function(destination) {
+            budget_max: destination.budget_max == null
+                ? NaN
+                : Number(destination.budget_max),
 
-                return {
+            days: Number(
+                destination.recommended_days ??
+                destination.days ??
+                0
+            ),
 
-                    id:
-                        destination.id ??
-                        destination.destination_id,
+            rating: Number(destination.rating ?? 0),
 
+            image: String(
+                destination.image_url || destination.image || ""
+            ).trim()
+        }));
 
-                    name:
-                        destination.name ??
-                        destination.destination_name ??
-                        "",
+        filteredDestinations = [...destinations];
 
+populateFilters();
 
-                    type:
-                        destination.destination_type ??
-                        destination.type ??
-                        "",
+// RESTORE FILTERED RESULTS IF RETURNING FROM DESTINATION DETAILS
+if (!restoreExploreState()) {
 
+    currentPage = 1;
+    filteredDestinations = [...destinations];
 
-                    description:
-                        destination.description ??
-                        "",
+    displayDestinations();
+}
+    } catch (error) {
+        console.error("Destination loading error:", error);
 
+        grid.innerHTML = `
+            <p class="no-results" style="display:block;">
+                Unable to load destinations.
+                Please check whether the backend is running.
+            </p>
+        `;
+    }
+}
 
-                    // Use budget_min from backend
-                    budget:
-                        Number(
-                            destination.budget_min ??
-                            destination.budget ??
-                            destination.price ??
-                            0
-                        ),
-
-
-                    budget_min:
-                        Number(
-                            destination.budget_min ??
-                            0
-                        ),
+// --------------------------------------------------
+// POPULATE FILTERS USING DATABASE VALUES
+// --------------------------------------------------
 
 
-                    budget_max:
-                        Number(
-                            destination.budget_max ??
-                            0
-                        ),
+function populateFilters() {
 
+    // CATEGORY FILTER - USE DATABASE CATEGORIES
 
-                    // IMPORTANT:
-                    // Use recommended days function
-                    days:
-                        getRecommendedDays(
-                            destination
-                        ),
+    const typeFilter = document.getElementById("typeFilter");
 
+    if (typeFilter) {
+        const selectedType = typeFilter.value;
 
-                    rating:
-                        Number(
-                            destination.rating ??
-                            0
-                        ),
+        const categories = [
+            ...new Set(
+                destinations
+                    .map(destination => destination.type)
+                    .filter(Boolean)
+            )
+        ].sort();
 
+        typeFilter.innerHTML = `
+            <option value="">All Categories</option>
+            ${categories.map(category => `
+                <option value="${escapeHTML(category)}">
+                    ${escapeHTML(category)}
+                </option>
+            `).join("")}
+        `;
 
-                    // IMPORTANT:
-                    // First use image override,
-                    // then backend image
-                    image:
-                        IMAGE_OVERRIDES[
-                            destination.name
-                        ] ||
-                        destination.image_url ||
-                        destination.image ||
-                        destination.imageUrl ||
-                        ""
-
-                };
-
-            }
-        );
-
-
-        // ==================================================
-        // INITIAL DESTINATION LIST
-        // ==================================================
-
-        filteredDestinations =
-            [...destinations];
-
-
-        currentPage = 1;
-
-
-        displayDestinations();
-
-
-        console.log(
-            "Destinations loaded from backend:",
-            destinations
-        );
-
+        typeFilter.value = categories.includes(selectedType)
+            ? selectedType
+            : "";
     }
 
-    catch (error) {
+    // BUDGET FILTER - USE MINIMUM AND MAXIMUM DATABASE BUDGETS
 
-        console.error(
-            "Error loading destinations:",
-            error
+    const budgetFilter = document.getElementById("budgetFilter");
+
+    if (budgetFilter) {
+        const selectedBudget = budgetFilter.value;
+
+        const allBudgets = destinations.flatMap(destination => [
+            Number(destination.budget_min),
+            Number(destination.budget_max)
+        ]).filter(amount =>
+            Number.isFinite(amount) && amount > 0
         );
 
+        const highestBudget = allBudgets.length
+            ? Math.max(...allBudgets)
+            : 0;
 
-        const grid =
-            document.getElementById(
-                "destinationGrid"
-            );
+        const highestLimit = Math.ceil(highestBudget / 5000) * 5000;
 
+        const budgetOptions = [];
 
-        if (grid) {
-
-            grid.innerHTML = `
-                <p style="
-                    text-align:center;
-                    width:100%;
-                    padding:30px;
-                ">
-                    Unable to load destinations.
-                    Please make sure the backend is running.
-                </p>
-            `;
-
+        for (let amount = 5000; amount <= highestLimit; amount += 5000) {
+            budgetOptions.push(amount);
         }
 
+        budgetFilter.innerHTML = `
+            <option value="">All Budgets</option>
+            ${budgetOptions.map(amount => `
+                <option value="${amount}">
+                    Up to ${formatBudget(amount)}
+                </option>
+            `).join("")}
+        `;
+
+        budgetFilter.value = budgetOptions.includes(Number(selectedBudget))
+            ? selectedBudget
+            : "";
     }
 
+    // DURATION FILTER - USE DATABASE DURATIONS
+
+    const durationFilter = document.getElementById("durationFilter");
+
+    if (durationFilter) {
+        const selectedDays = durationFilter.value;
+
+        const durations = [
+            ...new Set(
+                destinations
+                    .map(destination => destination.days)
+                    .filter(days => Number.isFinite(days) && days > 0)
+            )
+        ].sort((a, b) => a - b);
+
+        durationFilter.innerHTML = `
+            <option value="">Any Duration</option>
+            ${durations.map(days => `
+                <option value="${days}">
+                    ${days} Days
+                </option>
+            `).join("")}
+        `;
+
+        durationFilter.value = durations.includes(Number(selectedDays))
+            ? selectedDays
+            : "";
+    }
 }
 
 
-// ==================================================
-// DISPLAY DESTINATIONS
-// ==================================================
+// --------------------------------------------------
+// DISPLAY DESTINATION CARDS
+// --------------------------------------------------
 
 function displayDestinations() {
 
-    const grid =
-        document.getElementById(
-            "destinationGrid"
-        );
+    const grid = document.getElementById("destinationGrid");
+    const noResults = document.getElementById("noResults");
+    const pagination = document.getElementById("pagination");
 
+    if (!grid) return;
 
-    const noResults =
-        document.getElementById(
-            "noResults"
-        );
+    const totalPages = Math.ceil(
+        filteredDestinations.length / cardsPerPage
+    );
 
-
-    if (!grid) {
-
-        console.error(
-            "destinationGrid not found in HTML"
-        );
-
-        return;
-
-    }
-
-
-    // Clear old cards
-    grid.innerHTML = "";
-
-
-    const startIndex =
-        (currentPage - 1) *
-        cardsPerPage;
-
-
-    const endIndex =
-        startIndex +
-        cardsPerPage;
-
-
-    const pageDestinations =
-        filteredDestinations.slice(
-            startIndex,
-            endIndex
-        );
-
-
-    // ==================================================
-    // NO RESULTS
-    // ==================================================
-
-    if (
-        pageDestinations.length === 0
-    ) {
+    if (filteredDestinations.length === 0) {
+        grid.innerHTML = "";
 
         if (noResults) {
-
-            noResults.style.display =
-                "block";
-
+            noResults.style.display = "block";
         }
 
-        displayPagination();
+        if (pagination) {
+            pagination.innerHTML = "";
+        }
 
         return;
-
     }
-
 
     if (noResults) {
-
-        noResults.style.display =
-            "none";
-
+        noResults.style.display = "none";
     }
 
+    const startIndex = (currentPage - 1) * cardsPerPage;
 
-    // ==================================================
-    // CREATE DESTINATION CARDS
-    // ==================================================
+    const pageDestinations = filteredDestinations.slice(
+        startIndex,
+        startIndex + cardsPerPage
+    );
 
-    pageDestinations.forEach(
-        function(destination) {
+    grid.innerHTML = pageDestinations.map(destination => {
 
-            const card =
-                document.createElement(
-                    "div"
-                );
+        const imageHTML = destination.image
+            ? `
+                <div class="destination-image-wrap">
+                    <img
+                        src="${escapeHTML(destination.image)}"
+                        alt="${escapeHTML(destination.name)}"
+                        class="destination-card-image"
+                        loading="lazy"
+                    >
+                    <div class="destination-image-fallback" hidden>
+                        Image unavailable
+                    </div>
+                </div>
+            `
+            : `
+                <div class="destination-image-wrap">
+                    <div class="destination-image-fallback">
+                        Image unavailable
+                    </div>
+                </div>
+            `;
 
+        const budgetText =
+    Number.isFinite(destination.budget_min) &&
+    Number.isFinite(destination.budget_max)
+        ? `${formatBudget(destination.budget_min)} - ${formatBudget(destination.budget_max)}`
+        : "Budget information currently unavailable";
 
-            card.className =
-                "destination-card";
+        const durationText =
+            destination.days > 0
+                ? `${destination.days} Days`
+                : "Duration not specified";
 
+        return `
+            <div class="explore-destination-card"
+                 data-id="${escapeHTML(destination.id)}">
 
-            card.innerHTML = `
-
-                <img
-                    src="${destination.image}"
-                    alt="${destination.name}"
-                    onerror="this.style.display='none';"
-                >
+                ${imageHTML}
 
                 <div class="destination-card-content">
 
-                    <h3>
-                        ${destination.name}
-                    </h3>
+    <h3>
+        ${escapeHTML(destination.name)}
+    </h3>
 
-                    <p class="destination-type">
-                        ${destination.type}
-                    </p>
+    <p class="destination-type">
+        ${escapeHTML(destination.type)}
+    </p>
 
                     <p class="destination-description">
-                        ${destination.description}
+                        ${escapeHTML(
+                            destination.description ||
+                            "Explore this beautiful destination."
+                        )}
                     </p>
 
                     <div class="destination-info-row">
-
-                        <span>
-                            ₹${destination.budget.toLocaleString("en-IN")}
-                        </span>
-
-                        <span>
-                            ⭐ ${destination.rating}
-                        </span>
-
+                        <span>${escapeHTML(budgetText)}</span>
                     </div>
 
-                    <p class="destination-days">
-                        ${destination.days} days recommended
-                    </p>
+                    <div class="destination-days">
+                        ${escapeHTML(durationText)}
+                    </div>
 
                 </div>
+            </div>
+        `;
 
-            `;
+    }).join("");
 
+    // HANDLE MISSING OR BROKEN IMAGES
 
-            // ==================================================
-            // DESTINATION CLICK
-            // ==================================================
+    grid.querySelectorAll(".destination-card-image").forEach(image => {
 
-            card.addEventListener(
-                "click",
-                async function() {
+        function showFallback() {
+            image.style.display = "none";
 
+            const fallback = image.nextElementSibling;
 
-                    // ------------------------------------------
-                    // SAVE SELECTED DESTINATION
-                    // ------------------------------------------
-
-                    localStorage.setItem(
-                        "selectedDestination",
-                        JSON.stringify(
-                            destination
-                        )
-                    );
-
-
-                    // Remember that destination
-                    // was opened from Explore
-
-                    localStorage.setItem(
-                        "destinationSource",
-                        "explore"
-                    );
-
-
-                    // ------------------------------------------
-                    // RECORD INTERACTION
-                    // ------------------------------------------
-
-                    if (destination.id) {
-
-                        try {
-
-                            const response =
-                                await fetch(
-                                    `${API_URL}/api/destinations/${destination.id}/interaction`,
-                                    {
-                                        method: "POST",
-
-                                        headers: {
-                                            "Content-Type":
-                                                "application/json"
-                                        },
-
-                                        body:
-                                            JSON.stringify({
-                                                interaction_type:
-                                                    "click"
-                                            })
-                                    }
-                                );
-
-
-                            const result =
-                                await response.json();
-
-
-                            console.log(
-                                "RAW BACKEND DATA:",
-                                result
-                            );
-
-
-                            console.log(
-                                "Interaction recorded:",
-                                result
-                            );
-
-                        }
-
-                        catch (error) {
-
-                            console.error(
-                                "Interaction error:",
-                                error
-                            );
-
-                        }
-
-                    }
-
-
-                    // ------------------------------------------
-                    // OPEN DESTINATION PAGE
-                    // ------------------------------------------
-
-                    window.location.href =
-                        "destination.html";
-
-                }
-            );
-
-
-            grid.appendChild(
-                card
-            );
-
+            if (fallback) {
+                fallback.hidden = false;
+            }
         }
-    );
 
+        image.addEventListener("error", showFallback);
 
-    displayPagination();
+        if (image.complete && image.naturalWidth === 0) {
+            showFallback();
+        }
+    });
 
+    
+
+   
+    // OPEN DESTINATION DETAILS
+
+    grid.querySelectorAll(".explore-destination-card").forEach(card => {
+
+        card.addEventListener("click", async function () {
+
+            const destinationId = Number(this.dataset.id);
+
+            const selected = destinations.find(
+                destination => Number(destination.id) === destinationId
+            );
+
+            if (!selected) return;
+
+            // SAVE CURRENT FILTERS, SEARCH AND PAGE NUMBER
+            const exploreState = {
+                search: document.getElementById("searchInput")?.value || "",
+                type: document.getElementById("typeFilter")?.value || "",
+                budget: document.getElementById("budgetFilter")?.value || "",
+                duration: document.getElementById("durationFilter")?.value || "",
+                sort: document.getElementById("sortFilter")?.value || "",
+                page: currentPage
+            };
+
+            sessionStorage.setItem(
+                "waymateExploreState",
+                JSON.stringify(exploreState)
+            );
+
+            // SAVE SELECTED DESTINATION
+            localStorage.setItem(
+                "selectedDestination",
+                JSON.stringify(selected)
+            );
+
+            localStorage.setItem("destinationSource", "explore");
+
+            // RECORD DESTINATION CLICK
+            try {
+                await fetch(
+                    `${API_URL}/api/destinations/${destinationId}/interaction`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            interaction_type: "click"
+                        })
+                    }
+                );
+            } catch (error) {
+                console.error("Interaction recording failed:", error);
+            }
+
+            // OPEN DESTINATION DETAILS
+            window.location.href = "destination.html?source=explore";
+        });
+
+    });
+
+    displayPagination(totalPages);
 }
 
-
-// ==================================================
+// --------------------------------------------------
 // PAGINATION
-// ==================================================
+// --------------------------------------------------
 
-function displayPagination() {
+function displayPagination(totalPages) {
 
-    const pagination =
-        document.getElementById(
-            "pagination"
-        );
+    const pagination = document.getElementById("pagination");
 
-
-    if (!pagination) {
-
-        return;
-
-    }
-
-
-    pagination.innerHTML = "";
-
-
-    const totalPages =
-        Math.ceil(
-            filteredDestinations.length /
-            cardsPerPage
-        );
-
+    if (!pagination) return;
 
     if (totalPages <= 1) {
-
+        pagination.innerHTML = "";
         return;
-
     }
 
+    let html = "";
 
-    // ==================================================
-    // PAGE NUMBERS
-    // ==================================================
-
-    for (
-        let i = 1;
-        i <= totalPages;
-        i++
-    ) {
-
-        const button =
-            document.createElement(
-                "button"
-            );
-
-
-        button.textContent =
-            i;
-
-
-        if (i === currentPage) {
-
-            button.classList.add(
-                "active-page"
-            );
-
-        }
-
-
-        button.onclick =
-            function() {
-
-                currentPage =
-                    i;
-
-
-                displayDestinations();
-
-
-                window.scrollTo({
-                    top: 0,
-                    behavior: "smooth"
-                });
-
-            };
-
-
-        pagination.appendChild(
-            button
-        );
-
+    for (let page = 1; page <= totalPages; page++) {
+        html += `
+            <button
+                class="${page === currentPage ? "active-page" : ""}"
+                data-page="${page}">
+                ${page}
+            </button>
+        `;
     }
 
-
-    // ==================================================
-    // NEXT BUTTON
-    // ==================================================
-
-    if (
-        currentPage < totalPages
-    ) {
-
-        const nextButton =
-            document.createElement(
-                "button"
-            );
-
-
-        nextButton.textContent =
-            "›";
-
-
-        nextButton.onclick =
-            function() {
-
-                currentPage++;
-
-
-                displayDestinations();
-
-
-                window.scrollTo({
-                    top: 0,
-                    behavior: "smooth"
-                });
-
-            };
-
-
-        pagination.appendChild(
-            nextButton
-        );
-
+    if (currentPage < totalPages) {
+        html += `
+            <button data-page="${currentPage + 1}">
+                Next →
+            </button>
+        `;
     }
 
+    pagination.innerHTML = html;
+
+    pagination.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", function () {
+            currentPage = Number(this.dataset.page);
+            displayDestinations();
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        });
+    });
 }
 
-
-// ==================================================
-// SEARCH
-// ==================================================
-
-function searchDestinations() {
-
-    applyFilters();
-
-}
-
-
-// ==================================================
-// FILTERS
-// ==================================================
+// --------------------------------------------------
+// SEARCH AND FILTERS
+// --------------------------------------------------
 
 function applyFilters() {
 
-    const searchElement =
-        document.getElementById(
-            "searchInput"
+    const searchInput = document.getElementById("searchInput");
+    const typeFilter = document.getElementById("typeFilter");
+    const budgetFilter = document.getElementById("budgetFilter");
+    const durationFilter = document.getElementById("durationFilter");
+    const sortFilter = document.getElementById("sortFilter");
+
+    const searchText = searchInput
+        ? searchInput.value.trim().toLowerCase()
+        : "";
+
+    const selectedType = typeFilter ? typeFilter.value : "";
+
+    const selectedBudget = budgetFilter && budgetFilter.value
+        ? Number(budgetFilter.value)
+        : 0;
+
+    const selectedDays = durationFilter && durationFilter.value
+        ? Number(durationFilter.value)
+        : 0;
+
+    filteredDestinations = destinations.filter(destination => {
+
+        const matchesSearch =
+            String(destination.name).toLowerCase().includes(searchText) ||
+            String(destination.location || "").toLowerCase().includes(searchText);
+
+        const matchesType =
+            !selectedType || destination.type === selectedType;
+
+        const matchesBudget =
+            !selectedBudget ||
+            (Number.isFinite(destination.budget_min) &&
+                destination.budget_min <= selectedBudget);
+
+        const matchesDuration =
+            !selectedDays ||
+            destination.days === selectedDays;
+
+        return (
+            matchesSearch &&
+            matchesType &&
+            matchesBudget &&
+            matchesDuration
         );
+    });
 
+    const sortValue = sortFilter ? sortFilter.value : "default";
 
-    const typeElement =
-        document.getElementById(
-            "typeFilter"
-        );
-
-
-    const budgetElement =
-        document.getElementById(
-            "budgetFilter"
-        );
-
-
-    const durationElement =
-        document.getElementById(
-            "durationFilter"
-        );
-
-
-    const sortElement =
-        document.getElementById(
-            "sortFilter"
-        );
-
-
-    const searchValue =
-        searchElement
-            ? searchElement.value
-                .toLowerCase()
-                .trim()
-            : "";
-
-
-    const selectedType =
-        typeElement
-            ? typeElement.value
-            : "all";
-
-
-    const selectedBudget =
-        budgetElement
-            ? budgetElement.value
-            : "all";
-
-
-    const selectedDuration =
-        durationElement
-            ? durationElement.value
-            : "all";
-
-
-    const selectedSort =
-        sortElement
-            ? sortElement.value
-            : "default";
-
-
-    // ==================================================
-    // FILTER DESTINATIONS
-    // ==================================================
-
-    filteredDestinations =
-        destinations.filter(
-            function(destination) {
-
-
-                // ------------------------------------------
-                // SEARCH
-                // ------------------------------------------
-
-                const matchesSearch =
-                    destination.name
-                        .toLowerCase()
-                        .includes(
-                            searchValue
-                        );
-
-
-                // ------------------------------------------
-                // TYPE
-                // ------------------------------------------
-
-                const matchesType =
-                    selectedType === "all" ||
-                    String(destination.type || "")
-                        .trim()
-                        .toLowerCase() ===
-                    String(selectedType || "")
-                        .trim()
-                        .toLowerCase();
-
-
-                // ------------------------------------------
-                // BUDGET
-                // ------------------------------------------
-
-                const matchesBudget =
-                    selectedBudget === "all" ||
-                    destination.budget <=
-                        Number(
-                            selectedBudget
-                        );
-
-
-                // ------------------------------------------
-                // DURATION
-                // ------------------------------------------
-
-                const matchesDuration =
-                    selectedDuration === "all" ||
-                    Number(destination.days) ===
-                        Number(selectedDuration);
-
-
-                return (
-                    matchesSearch &&
-                    matchesType &&
-                    matchesBudget &&
-                    matchesDuration
-                );
-
-            }
-        );
-
-
-    // ==================================================
-    // SORTING
-    // ==================================================
-
-    if (
-        selectedSort === "priceLow"
-    ) {
-
+    if (sortValue === "priceLow") {
         filteredDestinations.sort(
-            function(a, b) {
-
-                return (
-                    a.budget -
-                    b.budget
-                );
-
-            }
+            (a, b) => a.budget_min - b.budget_min
         );
-
-    }
-
-
-    if (
-        selectedSort === "priceHigh"
-    ) {
-
+    } else if (sortValue === "priceHigh") {
         filteredDestinations.sort(
-            function(a, b) {
-
-                return (
-                    b.budget -
-                    a.budget
-                );
-
-            }
+            (a, b) => b.budget_min - a.budget_min
         );
-
-    }
-
-
-    if (
-        selectedSort === "ratingHigh"
-    ) {
-
+    } else if (sortValue === "ratingHigh") {
         filteredDestinations.sort(
-            function(a, b) {
-
-                return (
-                    b.rating -
-                    a.rating
-                );
-
-            }
+            (a, b) => b.rating - a.rating
         );
-
     }
-
-
-    // ==================================================
-    // GO BACK TO PAGE 1
-    // ==================================================
 
     currentPage = 1;
-
-
     displayDestinations();
-
 }
 
+// RESTORE FILTERED EXPLORE RESULTS AFTER RETURNING FROM DESTINATION
 
-// ==================================================
-// PAGE LOAD
-// ==================================================
+function restoreExploreState() {
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function() {
+    const savedState = sessionStorage.getItem("waymateExploreState");
 
-
-        // ------------------------------------------
-        // SEARCH ENTER KEY
-        // ------------------------------------------
-
-        const searchInput =
-            document.getElementById(
-                "searchInput"
-            );
-
-
-        if (searchInput) {
-
-            searchInput.addEventListener(
-                "keydown",
-                function(event) {
-
-                    if (
-                        event.key === "Enter"
-                    ) {
-
-                        searchDestinations();
-
-                    }
-
-                }
-            );
-
-        }
-
-
-        // ------------------------------------------
-        // BACK TO EXPLORE BUTTON
-        // ------------------------------------------
-
-        const backToExplore =
-            document.getElementById(
-                "backToExplore"
-            );
-
-
-        if (backToExplore) {
-
-            backToExplore.addEventListener(
-                "click",
-                function() {
-
-                    window.location.href =
-                        "explore.html";
-
-                }
-            );
-
-        }
-
-
-        // ------------------------------------------
-        // LOAD DESTINATIONS
-        // ------------------------------------------
-
-        loadDestinations();
-
+    if (!savedState) {
+        return false;
     }
-);
+
+    try {
+        const state = JSON.parse(savedState);
+
+        // RESTORE SEARCH
+        document.getElementById("searchInput").value =
+            state.search || "";
+
+        // RESTORE FILTERS
+        document.getElementById("typeFilter").value =
+            state.type || "";
+
+        document.getElementById("budgetFilter").value =
+            state.budget || "";
+
+        document.getElementById("durationFilter").value =
+            state.duration || "";
+
+        document.getElementById("sortFilter").value =
+            state.sort || "";
+
+        // APPLY THE PREVIOUS FILTERS
+        applyFilters();
+
+        // RESTORE PREVIOUS PAGE NUMBER
+        const totalPages = Math.max(
+            1,
+            Math.ceil(filteredDestinations.length / cardsPerPage)
+        );
+
+        currentPage = Math.min(
+            Math.max(1, Number(state.page) || 1),
+            totalPages
+        );
+
+        displayDestinations();
+
+        return true;
+
+    } catch (error) {
+        console.error("Explore state restoration failed:", error);
+
+        sessionStorage.removeItem("waymateExploreState");
+
+        return false;
+    }
+}
+
+// --------------------------------------------------
+// EVENT LISTENERS
+// --------------------------------------------------
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const searchInput = document.getElementById("searchInput");
+
+    if (searchInput) {
+        searchInput.addEventListener("input", applyFilters);
+    }
+
+    [
+        "typeFilter",
+        "budgetFilter",
+        "durationFilter",
+        "sortFilter"
+    ].forEach(id => {
+
+        const element = document.getElementById(id);
+
+        if (element) {
+            element.addEventListener("change", applyFilters);
+        }
+
+    });
+
+    const backButton = document.getElementById("backToExplore");
+
+    if (backButton) {
+        backButton.addEventListener("click", function () {
+            window.location.href = "explore.html";
+        });
+    }
+
+    loadDestinations();
+});

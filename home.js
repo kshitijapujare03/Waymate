@@ -39,7 +39,7 @@ async function loadPopularDestinations() {
 
 
         destinations
-            .slice(0, 4)
+            .slice(0, 6)
             .forEach(function(destination, index) {
 
                 const card = cards[index];

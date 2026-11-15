@@ -4,7 +4,12 @@ import mysql.connector
 
 from db import get_db_connection
 
-from auth_service import create_user, verify_user
+from auth_service import (
+    create_user,
+    verify_user,
+    get_user_profile,
+    update_user_profile
+)
 
 from destination_service import (
     get_popular_destinations,
@@ -144,6 +149,89 @@ def login():
             "message": str(e)
         }), 500
 
+# ============================================================
+# GET USER PROFILE
+# ============================================================
+
+@app.route("/api/profile/<int:user_id>", methods=["GET"])
+def user_profile(user_id):
+
+    try:
+        profile = get_user_profile(user_id)
+
+        if not profile:
+            return jsonify({
+                "message": "User profile not found"
+            }), 404
+
+        return jsonify({
+            "profile": profile
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "message": str(e)
+        }), 500
+
+
+# ============================================================
+# UPDATE USER PROFILE
+# ============================================================
+
+@app.route("/api/profile/<int:user_id>", methods=["PUT"])
+def edit_user_profile(user_id):
+
+    data = request.get_json(silent=True) or {}
+
+    full_name = (data.get("full_name") or "").strip()
+    email = (data.get("email") or "").strip().lower()
+    mobile_number = (data.get("mobile_number") or "").strip()
+
+    if not full_name or not email:
+        return jsonify({
+            "message": "Name and email are required"
+        }), 400
+
+    if "@" not in email:
+        return jsonify({
+            "message": "Please enter a valid email address"
+        }), 400
+
+    if len(mobile_number) > 15:
+        return jsonify({
+            "message": "Mobile number cannot exceed 15 characters"
+        }), 400
+
+    try:
+        update_user_profile(
+            user_id,
+            full_name,
+            email,
+            mobile_number or None
+        )
+
+        # Fetch the updated profile to confirm the user exists.
+        profile = get_user_profile(user_id)
+
+        if not profile:
+            return jsonify({
+                "message": "User profile not found"
+            }), 404
+
+        return jsonify({
+            "message": "Profile updated successfully",
+            "profile": profile
+        }), 200
+
+    except mysql.connector.IntegrityError:
+        return jsonify({
+            "message": "This email address is already registered"
+        }), 409
+
+    except Exception as e:
+        return jsonify({
+            "message": str(e)
+        }), 500
 
 # ============================================================
 # POPULAR DESTINATIONS
@@ -984,15 +1072,10 @@ def plan_trip():
 # CREATE TRIP
 # ============================================================
 
-@app.route(
-    "/api/my-trips",
-    methods=["POST"]
-)
+@app.route("/api/my-trips", methods=["POST"])
 def add_trip():
 
-    data = request.get_json(
-        silent=True
-    ) or {}
+    data = request.get_json(silent=True) or {}
 
     required_fields = [
         "user_id",
@@ -1002,69 +1085,49 @@ def add_trip():
     ]
 
     for field in required_fields:
-
         if data.get(field) is None:
-
             return jsonify({
-
-                "message":
-                f"{field} is required"
-
+                "message": f"{field} is required"
             }), 400
 
     try:
-
-        trip_id = create_trip(
-
-            data.get(
-                "user_id"
-            ),
-
-            data.get(
-                "destination_id"
-            ),
-
-            data.get(
-                "trip_type"
-            ),
-
-            data.get(
-                "number_of_people",
-                1
-            ),
-
-            data.get(
-                "number_of_days"
-            ),
-
-            data.get(
-                "budget"
-            ),
-
-            data.get(
-                "start_date"
-            ),
-
-            data.get(
-                "end_date"
-            )
+        result = create_trip(
+            data.get("user_id"),
+            data.get("destination_id"),
+            data.get("trip_type"),
+            data.get("number_of_people", 1),
+            data.get("number_of_days"),
+            data.get("budget"),
+            data.get("start_date"),
+            data.get("end_date"),
+            data.get("notes")
         )
 
+        # Updated trip_service.py may return both values.
+        if isinstance(result, tuple):
+            trip_id, already_exists = result
+        else:
+            trip_id = result
+            already_exists = False
+
+        if already_exists:
+            return jsonify({
+                "message": "This trip already exists",
+                "trip_id": trip_id,
+                "already_exists": True
+            }), 200
+
         return jsonify({
-
-            "message":
-            "Trip created successfully",
-
-            "trip_id":
-            trip_id
-
+            "message": "Trip created successfully",
+            "trip_id": trip_id,
+            "already_exists": False
         }), 201
 
     except Exception as e:
-
         return jsonify({
             "message": str(e)
         }), 500
+
 
 
 # ============================================================
@@ -1089,6 +1152,144 @@ def my_trips(user_id):
 
     except Exception as e:
 
+        return jsonify({
+            "message": str(e)
+        }), 500
+
+# ============================================================
+# UPDATE TRIP DETAILS
+# ============================================================
+
+@app.route("/api/my-trips/<int:trip_id>", methods=["PUT"])
+def edit_trip(trip_id):
+
+    from trip_service import update_trip
+
+    data = request.get_json(silent=True) or {}
+
+    required_fields = [
+        "user_id",
+        "start_date",
+        "number_of_days"
+    ]
+
+    for field in required_fields:
+        if data.get(field) is None:
+            return jsonify({
+                "message": f"{field} is required"
+            }), 400
+
+    status = data.get("status", "upcoming")
+
+    if status not in ["upcoming", "visited"]:
+        return jsonify({
+            "message": "Invalid trip status"
+        }), 400
+
+    try:
+        updated = update_trip(
+            trip_id,
+            data.get("user_id"),
+            data.get("start_date"),
+            data.get("end_date"),
+            data.get("number_of_days"),
+            data.get("budget"),
+            data.get("notes"),
+            status
+        )
+
+        if updated == 0:
+            return jsonify({
+                "message": "Trip not found or no changes made"
+            }), 404
+
+        return jsonify({
+            "message": "Trip updated successfully"
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "message": str(e)
+        }), 500
+
+
+# ============================================================
+# UPDATE TRIP STATUS
+# ============================================================
+
+@app.route(
+    "/api/my-trips/<int:trip_id>/status",
+    methods=["PUT"]
+)
+def edit_trip_status(trip_id):
+
+    from trip_service import update_trip_status
+
+    data = request.get_json(silent=True) or {}
+
+    user_id = data.get("user_id")
+    status = data.get("status")
+
+    if not user_id or status not in ["upcoming", "visited"]:
+        return jsonify({
+            "message": "Valid user_id and status are required"
+        }), 400
+
+    try:
+        updated = update_trip_status(
+            trip_id,
+            user_id,
+            status
+        )
+
+        if updated == 0:
+            return jsonify({
+                "message": "Trip not found or status unchanged"
+            }), 404
+
+        return jsonify({
+            "message": "Trip status updated successfully"
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "message": str(e)
+        }), 500
+
+# ============================================================
+# DELETE UPCOMING TRIP
+# ============================================================
+
+@app.route("/api/my-trips/<int:trip_id>", methods=["DELETE"])
+def delete_my_trip(trip_id):
+
+    from trip_service import delete_trip
+
+    data = request.get_json(silent=True) or {}
+
+    user_id = data.get("user_id")
+
+    if not user_id:
+        return jsonify({
+            "message": "user_id is required"
+        }), 400
+
+    try:
+        deleted = delete_trip(
+            trip_id,
+            user_id
+        )
+
+        if not deleted:
+            return jsonify({
+                "message": "Upcoming trip not found"
+            }), 404
+
+        return jsonify({
+            "message": "Trip removed successfully"
+        }), 200
+
+    except Exception as e:
         return jsonify({
             "message": str(e)
         }), 500

@@ -587,106 +587,141 @@ footer {
 </div>
 
 <script>
+const API_URL = "http://127.0.0.1:5000";
+const userId = localStorage.getItem("user_id");
 
-const PROFILE_KEY = "waymateUserProfile";
+let currentProfile = null;
 
-/* LOAD PROFILE */
+// Redirect if the user is not logged in.
+if (!userId) {
+    alert("Please login to view your account.");
+    window.location.href = "login.html";
+}
 
-function loadProfile() {
+// Display profile information on the page.
+function displayProfile(profile) {
+    currentProfile = profile;
 
-    let profile = {};
-
-    try {
-        profile = JSON.parse(localStorage.getItem(PROFILE_KEY)) || {};
-    } catch (error) {
-        profile = {};
-    }
-
-    const name = profile.name || "Sailee";
-    const email = profile.email || "sailee@example.com";
-    const phone = profile.phone || "";
+    const name = profile.full_name || "";
+    const email = profile.email || "";
+    const phone = profile.mobile_number || "";
 
     document.getElementById("profileName").textContent = name;
     document.getElementById("profileEmail").textContent = email;
 
     document.getElementById("detailName").textContent = name;
     document.getElementById("detailEmail").textContent = email;
-
     document.getElementById("detailPhone").textContent =
         phone || "Not added yet";
 
     document.getElementById("avatarInitial").textContent =
-        name.charAt(0).toUpperCase() || "S";
+        name.trim().charAt(0).toUpperCase() || "?";
 }
 
-/* OPEN EDIT PROFILE */
-
-function openProfileModal() {
-
-    let profile = {};
+// Fetch profile from MySQL through Flask.
+async function loadProfile() {
+    if (!userId) return;
 
     try {
-        profile = JSON.parse(localStorage.getItem(PROFILE_KEY)) || {};
+        const response = await fetch(
+            `${API_URL}/api/profile/${userId}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || "Unable to load profile.");
+        }
+
+        displayProfile(data.profile);
+
     } catch (error) {
-        profile = {};
+        console.error("Profile loading error:", error);
+        alert(error.message || "Could not load your profile.");
+    }
+}
+
+// Open edit profile modal.
+function openProfileModal() {
+    if (!currentProfile) {
+        alert("Please wait for your profile to load.");
+        return;
     }
 
     document.getElementById("editName").value =
-        profile.name || document.getElementById("profileName").textContent;
+        currentProfile.full_name || "";
 
     document.getElementById("editEmail").value =
-        profile.email || document.getElementById("profileEmail").textContent;
+        currentProfile.email || "";
 
     document.getElementById("editPhone").value =
-        profile.phone || "";
+        currentProfile.mobile_number || "";
 
     document.getElementById("profileModal").style.display = "flex";
 }
 
-/* CLOSE EDIT PROFILE */
-
+// Close edit profile modal.
 function closeProfileModal() {
     document.getElementById("profileModal").style.display = "none";
 }
 
-/* SAVE PROFILE */
-
-function saveProfile() {
-
+// Save updated profile to MySQL.
+async function saveProfile() {
     const name = document.getElementById("editName").value.trim();
     const email = document.getElementById("editEmail").value.trim();
     const phone = document.getElementById("editPhone").value.trim();
 
     if (!name || !email) {
-        alert("Please enter your name and email address.");
+        alert("Name and email are required.");
         return;
     }
 
-    const profile = {
-        name: name,
-        email: email,
-        phone: phone
-    };
+    try {
+        const response = await fetch(
+            `${API_URL}/api/profile/${userId}`,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    full_name: name,
+                    email: email,
+                    mobile_number: phone
+                })
+            }
+        );
 
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+        const data = await response.json();
 
-    loadProfile();
-    closeProfileModal();
+        if (!response.ok) {
+            throw new Error(data.message || "Profile update failed.");
+        }
 
-    alert("Profile updated successfully!");
+        displayProfile(data.profile);
+
+        // Keep the stored login name updated.
+        localStorage.setItem("user_name", data.profile.full_name);
+
+        closeProfileModal();
+
+        alert("Profile updated successfully!");
+
+    } catch (error) {
+        console.error("Profile update error:", error);
+        alert(error.message || "Could not update your profile.");
+    }
 }
 
-/* LOGOUT */
-
+// Logout without deleting trips, saved places or memories.
 function logoutUser() {
-
-    const confirmLogout = confirm(
-        "Are you sure you want to logout?"
-    );
+    const confirmLogout = confirm("Are you sure you want to logout?");
 
     if (!confirmLogout) return;
 
     const authKeys = [
+        "user_id",
+        "user_name",
         "token",
         "authToken",
         "access_token",
@@ -701,21 +736,8 @@ function logoutUser() {
     window.location.href = "index.html";
 }
 
-/* CLOSE MODAL ON OUTSIDE CLICK */
-
-window.addEventListener("click", function(event) {
-
-    const modal = document.getElementById("profileModal");
-
-    if (event.target === modal) {
-        closeProfileModal();
-    }
-});
-
-/* INITIALISE */
-
+// Load profile when the page opens.
 loadProfile();
-
 </script>
 
 </body>
