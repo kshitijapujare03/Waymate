@@ -10,7 +10,7 @@ import os
 from dotenv import load_dotenv
 
 
-# LOAD ENVIRONMENT VARIABLES FROM BACKEND FOLDER
+# LOAD ENVIRONMENT VARIABLES
 env_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(dotenv_path=env_path, override=True)
 
@@ -104,7 +104,6 @@ def plan_trip():
 
     try:
 
-        # FRONTEND INPUTS
         starting_city = data.get("startingCity", "")
 
         travel_days = int(
@@ -126,7 +125,6 @@ def plan_trip():
         travellers = data.get("travellers", "")
         companion = data.get("travelCompany", "")
 
-        # NEW DESTINATION AND WEATHER PREFERENCES
         preferred_destination = data.get(
             "preferredDestination",
             "not decided"
@@ -143,7 +141,6 @@ def plan_trip():
                 "error": "Please provide valid budget and travel days"
             }), 400
 
-        # BACKEND PREFERENCES
         preferences = {
             "destination_type": travel_type,
             "budget": budget,
@@ -170,7 +167,7 @@ def plan_trip():
             limit=3
         )
 
-        # FORMAT RECOMMENDATIONS FOR FRONTEND
+        # FORMAT RECOMMENDATIONS
         formatted_recommendations = []
 
         for destination in recommendations:
@@ -178,21 +175,24 @@ def plan_trip():
             item = dict(destination)
 
             item["image"] = item.get("image_url") or ""
+
+            # Preserve NULL budget instead of showing ₹0
             item["budget"] = clean_value(
                 item.get("budget_min")
-            ) or 0
+            )
 
             item["days"] = item.get("recommended_days") or 1
             item["type"] = item.get("destination_type") or ""
 
-            item["matchPercentage"] = item.get(
-                "match_percentage", 0
+            item["matchPercentage"] = clean_value(
+                item.get("match_percentage", 0)
             )
 
             item["matchExplanation"] = item.get(
                 "match_explanation", ""
             )
 
+            # Clean database values
             for key, value in item.items():
                 item[key] = clean_value(value)
 
