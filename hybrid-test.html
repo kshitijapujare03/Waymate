@@ -130,6 +130,7 @@
         .details {
             line-height: 1.8;
             font-size: 14px;
+            white-space: pre-line;
         }
 
         .explanation {
@@ -251,6 +252,45 @@ const statusBox = document.getElementById("status");
 const resultsBox = document.getElementById("recommendations");
 const submitBtn = document.getElementById("submitBtn");
 
+
+// FORMAT BUDGET
+function formatBudget(min, max) {
+
+    if (min == null || max == null ||
+        min === "" || max === "") {
+        return "Budget information unavailable";
+    }
+
+    return `₹${Number(min).toLocaleString("en-IN")} - ₹${Number(max).toLocaleString("en-IN")}`;
+}
+
+
+// FORMAT RATING
+function formatRating(rating) {
+
+    if (rating == null || rating === "" ||
+        !Number.isFinite(Number(rating)) ||
+        Number(rating) <= 0) {
+        return "Not Rated";
+    }
+
+    return `${rating}/5`;
+}
+
+
+// FORMAT WEATHER
+function formatWeather(weather) {
+
+    if (weather == null || String(weather).trim() === "" ||
+        String(weather).trim().toLowerCase() === "n/a") {
+        return "Weather information unavailable";
+    }
+
+    return weather;
+}
+
+
+// FORM SUBMISSION
 form.addEventListener("submit", async function(event) {
 
     event.preventDefault();
@@ -296,65 +336,111 @@ form.addEventListener("submit", async function(event) {
             return;
         }
 
-        statusBox.textContent = data.message || "Recommendations generated successfully!";
+        statusBox.textContent =
+            data.message || "Recommendations generated successfully!";
+
 
         destinations.forEach(destination => {
 
             const card = document.createElement("div");
             card.className = "card";
 
-            const image = document.createElement("img");
-            image.src = destination.image || destination.image_url || "";
-            image.alt = destination.name || "Destination";
-            image.onerror = function() {
-                this.style.display = "none";
-            };
+
+            // DESTINATION IMAGE
+            const imageUrl = destination.image || destination.image_url;
+
+            if (imageUrl) {
+
+                const image = document.createElement("img");
+
+                image.src = imageUrl;
+                image.alt = destination.name || "Destination";
+
+                image.onerror = function() {
+                    this.style.display = "none";
+                };
+
+                card.appendChild(image);
+            }
+
 
             const content = document.createElement("div");
             content.className = "card-content";
 
+
+            // DESTINATION NAME
             const name = document.createElement("h2");
             name.textContent = destination.name || "Destination";
 
-            const location = document.createElement("p");
-            location.textContent = destination.location || "";
 
+            // LOCATION
+            const location = document.createElement("p");
+            location.textContent = destination.location || "Location unavailable";
+
+
+            // MATCH PERCENTAGE
             const match = document.createElement("p");
             match.className = "match";
-            match.textContent =
-                "Match: " + (destination.matchPercentage ?? destination.match_percentage ?? 0) + "%";
 
+            const matchValue =
+                destination.matchPercentage ??
+                destination.match_percentage ?? 0;
+
+            match.textContent = "Match: " + matchValue + "%";
+
+
+            // DESTINATION DETAILS
             const details = document.createElement("div");
             details.className = "details";
 
-            const budgetText = destination.budget_min != null &&
-                               destination.budget_max != null
-                ? `₹${Number(destination.budget_min).toLocaleString("en-IN")} - ₹${Number(destination.budget_max).toLocaleString("en-IN")}`
-                : "Budget information unavailable";
+            const budgetText = formatBudget(
+                destination.budget_min,
+                destination.budget_max
+            );
+
+            const ratingText = formatRating(destination.rating);
+
+            const weatherText = formatWeather(destination.weather);
+
+            const type =
+                destination.type ||
+                destination.destination_type ||
+                "N/A";
+
+            const days =
+                destination.days ??
+                destination.recommended_days ??
+                "N/A";
 
             details.textContent =
-                `Type: ${destination.type || destination.destination_type || "N/A"}
+                `Type: ${type}
 Budget: ${budgetText}
-Days: ${destination.days ?? destination.recommended_days ?? "N/A"}
-Rating: ${destination.rating ?? "N/A"}/5
-Weather: ${destination.weather || "N/A"}`;
+Days: ${days}
+Rating: ${ratingText}
+Weather: ${weatherText}`;
 
+
+            // EXPLANATION
             const explanation = document.createElement("p");
             explanation.className = "explanation";
+
             explanation.textContent =
                 destination.matchExplanation ||
                 destination.match_explanation ||
                 "";
 
+
             content.append(name, location, match, details, explanation);
-            card.append(image, content);
+            card.appendChild(content);
+
             resultsBox.appendChild(card);
 
         });
 
     } catch(error) {
 
-        statusBox.textContent = "Error: " + error.message +
+        statusBox.textContent =
+            "Error: " + error.message +
             ". Check whether backend is running on port 5001.";
 
     } finally {
