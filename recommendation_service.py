@@ -4,7 +4,7 @@ from math import sqrt
 
 
 # --------------------------------------------------
-# 1. FETCH ALL DESTINATIONS FROM MYSQL
+# 1. FETCH DESTINATIONS FROM MYSQL
 # --------------------------------------------------
 
 def get_all_destination_data():
@@ -52,11 +52,6 @@ def get_preference(preferences, *keys, default=None):
 
 
 def calculate_rating_popularity(destination):
-    """
-    Missing or zero rating gets a neutral score.
-    No fake rating is stored in the database.
-    """
-
     rating = safe_number(destination.get("rating"))
     popularity = safe_number(destination.get("popularity_value"))
 
@@ -74,7 +69,7 @@ def calculate_rating_popularity(destination):
 
 
 # --------------------------------------------------
-# 3. CATEGORY NORMALIZATION FOR DIVERSITY
+# 3. CATEGORY NORMALIZATION
 # --------------------------------------------------
 
 def get_category_group(destination_type):
@@ -83,10 +78,14 @@ def get_category_group(destination_type):
     if not category:
         return "unknown"
 
-    if any(word in category for word in ["heritage", "historical", "history", "cultural"]):
+    if any(word in category for word in [
+        "heritage", "historical", "history", "cultural"
+    ]):
         return "heritage"
 
-    if any(word in category for word in ["nature", "forest", "waterfall"]):
+    if any(word in category for word in [
+        "nature", "forest", "waterfall"
+    ]):
         return "nature"
 
     if any(word in category for word in ["mountain", "hill"]):
@@ -95,10 +94,14 @@ def get_category_group(destination_type):
     if "beach" in category:
         return "beach"
 
-    if any(word in category for word in ["religion", "religious", "spiritual"]):
+    if any(word in category for word in [
+        "religion", "religious", "spiritual"
+    ]):
         return "religion"
 
-    if any(word in category for word in ["adventure", "trekking"]):
+    if any(word in category for word in [
+        "adventure", "trekking"
+    ]):
         return "adventure"
 
     if "desert" in category:
@@ -145,26 +148,32 @@ def calculate_budget_score(destination, preferences):
         get_preference(preferences, "budget", default=0)
     )
 
-    minimum = safe_number(destination.get("budget_min"))
-    maximum = safe_number(destination.get("budget_max"))
+    raw_minimum = destination.get("budget_min")
+    raw_maximum = destination.get("budget_max")
+
+    # Unknown or incomplete destination budget:
+    # Do not treat it as a confirmed budget match.
+    if raw_minimum is None or raw_maximum is None:
+        return 50
+
+    minimum = safe_number(raw_minimum)
+    maximum = safe_number(raw_maximum)
+
+    if minimum <= 0 or maximum <= 0:
+        return 50
 
     if budget <= 0:
         return 100
 
-    if minimum <= budget <= maximum:
+    if budget >= minimum:
         return 100
 
-    if budget >= minimum and maximum > 0:
-        return 75
+    difference = minimum - budget
 
-    if budget < minimum:
-        difference = minimum - budget
-        return max(
-            0,
-            100 - (difference / max(minimum, 1)) * 100
-        )
-
-    return 50
+    return max(
+        0,
+        100 - (difference / max(minimum, 1)) * 100
+    )
 
 
 def calculate_days_score(destination, preferences):
@@ -219,7 +228,7 @@ def calculate_destination_score(destination, preferences):
 
 
 # --------------------------------------------------
-# 5. WEATHER-BASED MATCHING
+# 5. WEATHER MATCHING
 # --------------------------------------------------
 
 def calculate_weather_score(destination, preferences):
@@ -264,9 +273,11 @@ def calculate_content_score(destination, preferences):
     type_score = calculate_type_score(destination, preferences)
     budget_score = calculate_budget_score(destination, preferences)
     days_score = calculate_days_score(destination, preferences)
+
     destination_score = calculate_destination_score(
         destination, preferences
     )
+
     weather_score = calculate_weather_score(
         destination, preferences
     )
@@ -290,9 +301,11 @@ def calculate_knowledge_score(destination, preferences):
     type_score = calculate_type_score(destination, preferences)
     budget_score = calculate_budget_score(destination, preferences)
     days_score = calculate_days_score(destination, preferences)
+
     destination_score = calculate_destination_score(
         destination, preferences
     )
+
     weather_score = calculate_weather_score(
         destination, preferences
     )
@@ -399,13 +412,11 @@ def calculate_collaborative_scores(destinations, user_id=None):
 
     scores = {}
 
-    # Anonymous user: use rating and popularity
     if user_id is None:
         for destination in destinations:
             destination_id = int(destination["id"])
-
-            scores[destination_id] = (
-                calculate_rating_popularity(destination)
+            scores[destination_id] = calculate_rating_popularity(
+                destination
             )
 
         return scores
@@ -413,16 +424,13 @@ def calculate_collaborative_scores(destinations, user_id=None):
     try:
         profiles = get_user_profiles()
         current_id = str(user_id)
-
         target_profile = profiles.get(current_id, {})
 
-        # User has no activity: use rating and popularity
         if not target_profile:
             for destination in destinations:
                 destination_id = int(destination["id"])
-
-                scores[destination_id] = (
-                    calculate_rating_popularity(destination)
+                scores[destination_id] = calculate_rating_popularity(
+                    destination
                 )
 
             return scores
@@ -441,9 +449,13 @@ def calculate_collaborative_scores(destinations, user_id=None):
             if similarity > 0:
                 similarities[other_user] = similarity
 
+        destination_lookup = {
+            int(destination["id"]): destination
+            for destination in destinations
+        }
+
         for destination_id in destination_ids:
 
-            # Already interacted destinations get neutral score
             if destination_id in target_profile:
                 scores[destination_id] = 50
                 continue
@@ -468,13 +480,8 @@ def calculate_collaborative_scores(destinations, user_id=None):
                     (predicted / 6) * 100
                 )
             else:
-                scores[destination_id] = (
-                    calculate_rating_popularity(
-                        next(
-                            d for d in destinations
-                            if int(d["id"]) == destination_id
-                        )
-                    )
+                scores[destination_id] = calculate_rating_popularity(
+                    destination_lookup[destination_id]
                 )
 
         return {
@@ -483,12 +490,10 @@ def calculate_collaborative_scores(destinations, user_id=None):
         }
 
     except Exception:
-        # Safe fallback if collaborative data is unavailable
         for destination in destinations:
             destination_id = int(destination["id"])
-
-            scores[destination_id] = (
-                calculate_rating_popularity(destination)
+            scores[destination_id] = calculate_rating_popularity(
+                destination
             )
 
         return scores
@@ -501,11 +506,26 @@ def calculate_collaborative_scores(destinations, user_id=None):
 def create_match_explanation(destination, preferences):
     reasons = []
 
+    raw_minimum = destination.get("budget_min")
+    raw_maximum = destination.get("budget_max")
+
+    budget_is_known = (
+        raw_minimum is not None
+        and raw_maximum is not None
+        and safe_number(raw_minimum) > 0
+        and safe_number(raw_maximum) > 0
+    )
+
     if calculate_type_score(destination, preferences) >= 75:
         reasons.append("matches your preferred travel type")
 
-    if calculate_budget_score(destination, preferences) >= 75:
+    if (
+        budget_is_known
+        and calculate_budget_score(destination, preferences) >= 75
+    ):
         reasons.append("fits your budget")
+    elif not budget_is_known:
+        reasons.append("budget information is unavailable")
 
     if calculate_days_score(destination, preferences) >= 70:
         reasons.append("suits your travel duration")
@@ -527,7 +547,6 @@ def select_diverse_recommendations(recommendations, limit):
     selected = []
     used_categories = set()
 
-    # First pass: choose different destination categories
     for destination in recommendations:
         category = get_category_group(
             destination.get("destination_type")
@@ -540,7 +559,6 @@ def select_diverse_recommendations(recommendations, limit):
         if len(selected) >= limit:
             return selected
 
-    # Second pass: fill remaining places if needed
     selected_ids = {
         destination["id"] for destination in selected
     }
@@ -602,18 +620,13 @@ def get_recommendations(preferences, user_id=None, limit=3):
             knowledge_score * 0.25
         )
 
-        destination["content_score"] = round(
-            content_score, 2
-        )
-
+        destination["content_score"] = round(content_score, 2)
         destination["collaborative_score"] = round(
             collaborative_score, 2
         )
-
         destination["knowledge_score"] = round(
             knowledge_score, 2
         )
-
         destination["match_percentage"] = round(
             hybrid_score, 2
         )
@@ -627,34 +640,13 @@ def get_recommendations(preferences, user_id=None, limit=3):
 
         recommendations.append(destination)
 
-    # Sort by weather match first when a weather preference is selected
-    preferred_weather = normalize(
-        get_preference(
-            preferences,
-            "weather_preference",
-            "weatherPreference",
-            default="any"
-        )
+    # Sort by hybrid match score.
+    # Weather is already included in content and knowledge scores.
+    recommendations.sort(
+        key=lambda item: item["match_percentage"],
+        reverse=True
     )
 
-    if preferred_weather and preferred_weather not in (
-        "any", "any weather", "all", "not decided"
-    ):
-        recommendations.sort(
-            key=lambda item: (
-                calculate_weather_score(item, preferences),
-                item["match_percentage"]
-            ),
-            reverse=True
-        )
-
-    else:
-        recommendations.sort(
-            key=lambda item: item["match_percentage"],
-            reverse=True
-        )
-
-    # Select different categories while preserving ranking order
     final_limit = max(1, int(limit))
 
     return select_diverse_recommendations(
