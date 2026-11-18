@@ -2,24 +2,34 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from recommendation_service import get_recommendations
+
 from decimal import Decimal
 from datetime import date, datetime
 
+from dotenv import load_dotenv
 import requests
 import os
-from dotenv import load_dotenv
 
 
-# LOAD ENVIRONMENT VARIABLES
-env_path = os.path.join(os.path.dirname(__file__), ".env")
-load_dotenv(dotenv_path=env_path, override=True)
+# ==================================================
+# 1. FLASK SETUP
+# ==================================================
 
 app = Flask(__name__)
 CORS(app)
 
+# Load .env from backend folder
+env_path = os.path.join(os.path.dirname(__file__), ".env")
+load_dotenv(dotenv_path=env_path, override=True)
 
-# CONVERT DATABASE VALUES INTO JSON-FRIENDLY VALUES
-def clean_value(value):
+OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
+
+
+# ==================================================
+# 2. JSON CONVERSION HELPER
+# ==================================================
+
+def clean_data(value):
 
     if isinstance(value, Decimal):
         return float(value)
@@ -27,193 +37,357 @@ def clean_value(value):
     if isinstance(value, (date, datetime)):
         return value.isoformat()
 
+    if isinstance(value, dict):
+        return {
+            key: clean_data(val)
+            for key, val in value.items()
+        }
+
+    if isinstance(value, list):
+        return [
+            clean_data(item)
+            for item in value
+        ]
+
     return value
 
 
-# WEATHER API FUNCTION
-def get_weather(city):
+# ==================================================
+# 3. HOME ROUTE
+# ==================================================
 
-    api_key = os.getenv("OPENWEATHER_API_KEY")
+@app.route("/", methods=["GET"])
+def home():
 
-    if not api_key:
-        return {"error": "Weather API key not found"}
+    return jsonify({
+        "status": "success",
+        "message": "WayMate Hybrid Recommendation API is Running!",
+        "port": 5001
+    })
+
+
+# ==================================================
+# 4. WEATHER API
+# ==================================================
+
+@app.route("/api/weather", methods=["GET"])
+def get_weather():
+
+    city = request.args.get("city")
+
+    if not city:
+        return jsonify({
+            "status": "error",
+            "message": "Please provide a city."
+        }), 400
+
+    if not OPENWEATHER_API_KEY:
+        return jsonify({
+            "status": "error",
+            "message": "OpenWeather API key is missing in .env"
+        }), 500
 
     url = "https://api.openweathermap.org/data/2.5/weather"
 
     params = {
         "q": city,
-        "appid": api_key,
+        "appid": OPENWEATHER_API_KEY,
         "units": "metric"
     }
 
-    response = requests.get(url, params=params, timeout=10)
-
-    if response.status_code != 200:
-        return {"error": "Unable to fetch weather information"}
-
-    data = response.json()
-
-    return {
-        "city": data["name"],
-        "temperature": data["main"]["temp"],
-        "description": data["weather"][0]["description"],
-        "humidity": data["main"]["humidity"]
-    }
-
-
-# WEATHER API ROUTE
-@app.route("/api/weather", methods=["GET"])
-def weather():
-
-    city = request.args.get("city", "").strip()
-
-    if not city:
-        return jsonify({
-            "error": "Please provide a city"
-        }), 400
-
     try:
-        weather_data = get_weather(city)
+        response = requests.get(
+            url,
+            params=params,
+            timeout=10
+        )
 
-        if "error" in weather_data:
-            return jsonify(weather_data), 502
+        data = response.json()
 
-        return jsonify(weather_data), 200
+        if response.status_code != 200:
+            return jsonify({
+                "status": "error",
+                "message": data.get(
+                    "message",
+                    "Unable to fetch weather"
+                )
+            }), response.status_code
 
-    except requests.exceptions.RequestException:
         return jsonify({
-            "error": "Weather service is currently unavailable"
-        }), 502
+            "status": "success",
+            "city": data.get("name"),
+            "temperature": data["main"]["temp"],
+            "feels_like": data["main"]["feels_like"],
+            "weather": data["weather"][0]["main"],
+            "description": data["weather"][0]["description"],
+            "humidity": data["main"]["humidity"]
+        })
+
+    except requests.RequestException as error:
+
+        return jsonify({
+            "status": "error",
+            "message": str(error)
+        }), 500
 
 
-# HOME ROUTE
-@app.route("/", methods=["GET"])
-def home():
+# ==================================================
+# 5. HYBRID RECOMMENDATION API
+# ==================================================
 
-    return jsonify({
-        "message": "WayMate Backend is Running!",
-        "port": 5001
-    })
-
-
-# HYBRID TRAVEL RECOMMENDATION API
 @app.route("/api/plan-trip", methods=["POST"])
 def plan_trip():
 
-    data = request.get_json(silent=True) or {}
-
     try:
 
-        starting_city = data.get("startingCity", "")
+        data = request.get_json(silent=True)
 
-        travel_days = int(
-            data.get("travelDays")
-            or data.get("number_of_days")
-            or data.get("days")
-            or 0
+        if not isinstance(data, dict):
+            return jsonify({
+                "status": "error",
+                "message": "Please send valid JSON data."
+            }), 400
+
+        # ------------------------------------------
+        # GET USER INPUT
+        # ------------------------------------------
+
+        starting_city = data.get(
+            "startingCity",
+            data.get("starting_city", "")
         )
 
-        budget = float(data.get("budget") or 0)
-
-        travel_type = (
-            data.get("travelType")
-            or data.get("destination_type")
-            or data.get("type")
-            or "Any"
+        days = data.get(
+            "days",
+            data.get("number_of_days")
         )
 
-        travellers = data.get("travellers", "")
-        companion = data.get("travelCompany", "")
+        budget = data.get("budget")
+
+        unlimited_budget = data.get(
+            "unlimitedBudget",
+            data.get("unlimited_budget", False)
+        )
+
+        people = data.get(
+            "number_of_people",
+            data.get(
+                "numberOfPeople",
+                data.get("travellers", data.get("people", 1))
+            )
+        )
+
+        companion = data.get(
+            "companion",
+            data.get(
+                "travelCompany",
+                data.get("travel_company", "Any")
+            )
+        )
+
+        travel_type = data.get(
+            "travelType",
+            data.get("travel_type", "Any")
+        )
 
         preferred_destination = data.get(
             "preferredDestination",
-            "not decided"
+            data.get("preferred_destination", "Any")
         )
 
         weather_preference = data.get(
             "weatherPreference",
-            "any"
+            data.get("weather_preference", "Any")
         )
 
-        # INPUT VALIDATION
-        if budget <= 0 or travel_days <= 0:
-            return jsonify({
-                "error": "Please provide valid budget and travel days"
-            }), 400
-
-        preferences = {
-            "destination_type": travel_type,
-            "budget": budget,
-            "number_of_days": travel_days,
-            "starting_city": starting_city,
-            "number_of_people": travellers,
-            "companion": companion,
-            "preferred_destination": preferred_destination,
-            "weather_preference": weather_preference
-        }
-
-        # USER ID
         user_id = data.get("user_id")
 
+        # ------------------------------------------
+        # VALIDATE DAYS
+        # ------------------------------------------
+
+        try:
+            days = int(days)
+
+            if days <= 0:
+                raise ValueError
+
+        except (ValueError, TypeError):
+
+            return jsonify({
+                "status": "error",
+                "message": "Please enter valid number of days."
+            }), 400
+
+        # ------------------------------------------
+        # VALIDATE NUMBER OF PEOPLE
+        # ------------------------------------------
+
+        try:
+            people = int(people)
+
+            if people <= 0:
+                raise ValueError
+
+        except (ValueError, TypeError):
+
+            return jsonify({
+                "status": "error",
+                "message": "Number of people must be greater than zero."
+            }), 400
+
+        # ------------------------------------------
+        # VALIDATE BUDGET
+        # ------------------------------------------
+
+        if isinstance(unlimited_budget, str):
+            unlimited_budget = (
+                unlimited_budget.strip().lower()
+                in ("true", "1", "yes")
+            )
+
+        if isinstance(budget, str):
+            budget_text = budget.strip().lower()
+
+            if budget_text in ("", "unlimited", "none", "null"):
+                unlimited_budget = True
+
+        if unlimited_budget:
+            budget = 0
+
+        else:
+
+            try:
+                budget = float(budget)
+
+                if budget < 0:
+                    raise ValueError
+
+            except (ValueError, TypeError):
+
+                return jsonify({
+                    "status": "error",
+                    "message": "Please enter a valid budget or select unlimited budget."
+                }), 400
+
+        # ------------------------------------------
+        # VALIDATE USER ID
+        # ------------------------------------------
+
         if user_id not in (None, ""):
-            user_id = int(user_id)
+
+            try:
+                user_id = int(user_id)
+
+                if user_id <= 0:
+                    raise ValueError
+
+            except (ValueError, TypeError):
+
+                return jsonify({
+                    "status": "error",
+                    "message": "Invalid user ID."
+                }), 400
+
         else:
             user_id = None
 
-        # GENERATE HYBRID RECOMMENDATIONS
+        # ------------------------------------------
+        # PREPARE PREFERENCES
+        # ------------------------------------------
+
+        preferences = {
+
+            "starting_city": starting_city,
+
+            "number_of_days": days,
+
+            "budget": budget,
+
+            "unlimited_budget": unlimited_budget,
+
+            "number_of_people": people,
+
+            "companion": companion,
+
+            "travel_type": travel_type,
+
+            "preferred_destination": preferred_destination,
+
+            "weather_preference": weather_preference
+        }
+
+        # ------------------------------------------
+        # GET HYBRID RECOMMENDATIONS
+        # ------------------------------------------
+
         recommendations = get_recommendations(
             preferences,
-            user_id,
+            user_id=user_id,
             limit=3
         )
 
-        # FORMAT RECOMMENDATIONS
-        formatted_recommendations = []
+        recommendations = clean_data(recommendations)
 
-        for destination in recommendations:
+        # ------------------------------------------
+        # RESPONSE NOTES
+        # ------------------------------------------
 
-            item = dict(destination)
+        notes = [
+            "Starting city is currently not used in recommendation scoring because verified distance or route data is not available.",
+            "Weather preference is compared with destination weather information stored in the database. Live weather is available separately through /api/weather.",
+            "Unlimited budget does not apply a budget penalty."
+        ]
 
-            item["image"] = item.get("image_url") or ""
-
-            # Preserve NULL budget instead of showing ₹0
-            item["budget"] = clean_value(
-                item.get("budget_min")
+        if user_id is None:
+            notes.append(
+                "No logged-in user ID was provided. Collaborative filtering uses the popularity fallback where personal history is unavailable."
             )
 
-            item["days"] = item.get("recommended_days") or 1
-            item["type"] = item.get("destination_type") or ""
-
-            item["matchPercentage"] = clean_value(
-                item.get("match_percentage", 0)
+        elif recommendations:
+            notes.append(
+                "Collaborative filtering uses available user interaction history when valid records exist."
             )
 
-            item["matchExplanation"] = item.get(
-                "match_explanation", ""
-            )
-
-            # Clean database values
-            for key, value in item.items():
-                item[key] = clean_value(value)
-
-            formatted_recommendations.append(item)
+        # ------------------------------------------
+        # FINAL RESPONSE
+        # ------------------------------------------
 
         return jsonify({
-            "message": "Recommendations generated successfully",
-            "recommendations": formatted_recommendations
-        }), 200
 
-    except Exception as e:
+            "status": "success",
+
+            "message": "Hybrid recommendations generated successfully.",
+
+            "preferences": clean_data(preferences),
+
+            "recommendations": recommendations,
+
+            "notes": notes,
+
+            "hybrid_weights": {
+                "content_based": 50,
+                "collaborative": 25,
+                "knowledge_based": 25
+            }
+
+        })
+
+    except Exception as error:
 
         app.logger.exception("Recommendation API error")
 
         return jsonify({
-            "error": "Unable to generate recommendations",
-            "details": str(e)
+            "status": "error",
+            "message": "Unable to generate recommendations.",
+            "details": str(error)
         }), 500
 
 
-# RUN BACKEND ON PORT 5001
+# ==================================================
+# 6. RUN SERVER
+# ==================================================
+
 if __name__ == "__main__":
 
     app.run(
