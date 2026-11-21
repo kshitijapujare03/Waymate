@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from recommendation_service import get_recommendations
 import mysql.connector
 
 from db import get_db_connection
@@ -37,6 +38,7 @@ from trip_service import (
     save_trip_preferences
 )
 
+from weather_service import get_destination_weather
 
 app = Flask(__name__)
 
@@ -752,6 +754,21 @@ def destination(destination_id):
             "message": str(e)
         }), 500
 
+# ============================================================
+# GET CURRENT WEATHER FOR A DESTINATION
+# ============================================================
+
+@app.route(
+    "/api/destinations/<int:destination_id>/weather",
+    methods=["GET"]
+)
+def destination_weather(destination_id):
+
+    result, status_code = get_destination_weather(
+        destination_id
+    )
+
+    return jsonify(result), status_code
 
 # ============================================================
 # EXPLORE SEARCH
@@ -985,87 +1002,70 @@ def remove_destination():
 # PLAN MY TRIP
 # ============================================================
 
-@app.route(
-    "/api/plan-trip",
-    methods=["POST"]
-)
+
+@app.route("/api/plan-trip", methods=["POST"])
 def plan_trip():
-
-    data = request.get_json(
-        silent=True
-    ) or {}
-
-    user_id = data.get(
-        "user_id"
-    )
-
-    destination_type = data.get(
-        "destination_type"
-    )
-
-    budget = data.get(
-        "budget"
-    )
-
-    travel_type = data.get(
-        "travel_type"
-    )
-
-    number_of_people = data.get(
-        "number_of_people"
-    )
-
-    number_of_days = data.get(
-        "number_of_days"
-    )
-
-    start_date = data.get(
-        "start_date"
-    )
-
-    if not user_id:
-
-        return jsonify({
-            "message":
-            "user_id is required"
-        }), 400
-
     try:
+        data = request.get_json() or {}
 
-        preference_id = save_trip_preferences(
+        user_id = data.get("user_id")
 
+        if not user_id:
+            return jsonify({
+                "success": False,
+                "message": "Please log in to get personalized recommendations."
+            }), 401
+
+        # Convert budget safely
+        budget_value = data.get("budget", 0)
+        unlimited_budget = (
+            str(budget_value).strip().lower()
+            in ("unlimited", "no limit", "any")
+        )
+
+        budget = 0 if unlimited_budget else float(budget_value or 0)
+
+        preferences = {
+    "starting_city": data.get("starting_city"),
+    "travel_type": data.get("travel_type", "Any"),
+    "budget": budget,
+    "unlimited_budget": unlimited_budget,
+    "number_of_people": data.get("number_of_people", 1),
+    "number_of_days": data.get("number_of_days", 3),
+    "companion": data.get("companion", "Any")
+}
+
+        # Save the submitted preferences for this user
+        save_trip_preferences(
             user_id,
+            preferences["travel_type"],
+            None if unlimited_budget else budget,
+            preferences["companion"],
+            preferences["number_of_people"],
+            preferences["number_of_days"],
+            data.get("start_date")
+        )
 
-            destination_type,
-
-            budget,
-
-            travel_type,
-
-            number_of_people,
-
-            number_of_days,
-
-            start_date
+        # Generate recommendations using the hybrid algorithm
+        recommendations = get_recommendations(
+            preferences,
+            user_id=user_id,
+            limit=6
         )
 
         return jsonify({
-
-            "message":
-            "Trip preferences saved",
-
-            "preference_id":
-            preference_id,
-
-            "recommendations": []
-
+            "success": True,
+            "recommendations": recommendations
         }), 200
 
     except Exception as e:
-
+        print("Plan trip error:", str(e))
         return jsonify({
-            "message": str(e)
+            "success": False,
+            "message": "Unable to generate recommendations.",
+            "error": str(e)
         }), 500
+
 
 
 # ============================================================
