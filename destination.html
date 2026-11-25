@@ -1,0 +1,1314 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Waymate - Destination</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* UPCOMING TRIPS BUTTON */
+
+        .upcoming-trip-button {
+            border: none;
+            background: #159b91;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .upcoming-trip-button:hover {
+            background: #087f78;
+        }
+
+        /* UPCOMING TRIP MODAL */
+
+        .trip-modal-bg {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #142c2b88;
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .trip-modal-bg.show {
+            display: flex;
+        }
+
+        .trip-modal {
+            background: white;
+            border-radius: 17px;
+            padding: 25px;
+            width: 100%;
+            max-width: 430px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .trip-modal h3 {
+            color: #245b55;
+            margin-bottom: 17px;
+        }
+
+        .trip-modal label {
+            display: block;
+            margin: 12px 0 6px;
+            color: #526762;
+            font-weight: 600;
+        }
+
+        .trip-modal input,
+        .trip-modal textarea {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #d6e2df;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .trip-modal textarea {
+            resize: vertical;
+            min-height: 85px;
+        }
+
+        .trip-modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 9px;
+            margin-top: 18px;
+        }
+
+        .trip-modal-actions button {
+            padding: 10px 16px;
+            border: 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .trip-cancel-btn {
+            background: #edf2f0;
+            color: #526762;
+        }
+
+        .trip-save-btn {
+            background: #167d78;
+            color: white;
+        }
+
+        .trip-save-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+    /* DESTINATION PAGE MAIN HEADING */
+.destination-main-info h1 {
+    margin: 0 0 8px;
+    color: #174d4a;
+    font-size: 36px;
+    font-weight: 700;
+}
+    </style>
+</head>
+
+<body>
+
+    <div class="destination-page">
+
+      <nav class="navbar">
+    <div class="logo">
+        <span class="logo-icon">✈</span>
+        <span class="logo-text">Waymate</span>
+    </div>
+
+    <div class="nav-links">
+        <a href="home.html">Home</a>
+        <a href="explore.html" class="active">Explore</a>
+        <a href="trips.html">My Trips</a>
+        <a href="account.html">My Account</a>
+    </div>
+</nav>
+
+
+        <main class="destination-container">
+
+            <a href="#" class="back-button" id="backButton">
+    &#8592; Go Back
+</a>
+
+            <div id="destinationContent"></div>
+
+        </main>
+
+
+        <footer class="footer">
+
+            <p>
+                Your journey, our recommendation.
+            </p>
+
+        </footer>
+
+    </div>
+
+
+    <!-- UPCOMING TRIP FORM -->
+
+    <div class="trip-modal-bg" id="upcomingTripModal">
+
+        <div class="trip-modal">
+
+            <h3>✏️ Edit Trip Details</h3>
+
+            <form id="upcomingTripForm" onsubmit="saveUpcomingTrip(event)">
+
+                <label for="newTripStart">Start Date</label>
+                <input
+                    type="date"
+                    id="newTripStart"
+                    required
+                >
+
+                <label for="newTripEnd">End Date</label>
+                <input
+                    type="date"
+                    id="newTripEnd"
+                    required
+                >
+
+                <label for="newTripBudget">Budget</label>
+                <input
+                    type="number"
+                    id="newTripBudget"
+                    placeholder="Enter your budget"
+                    min="0"
+                    step="0.01"
+                >
+
+                <label for="newTripNotes">Notes</label>
+                <textarea
+                    id="newTripNotes"
+                    placeholder="Add a note about your trip..."
+                ></textarea>
+
+                <div class="trip-modal-actions">
+
+                    <button
+                        type="button"
+                        class="trip-cancel-btn"
+                        onclick="closeUpcomingTripForm()"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="trip-save-btn"
+                        id="saveUpcomingTripButton"
+                    >
+                        Save Changes
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        const API_URL = "http://127.0.0.1:5000";
+
+        // Get the selected destination from the previous page
+        let selectedDestination = JSON.parse(
+            localStorage.getItem("selectedDestination")
+        );
+
+        const destinationContent = document.getElementById("destinationContent");
+
+
+        // Safely display database values
+        function escapeHTML(value) {
+
+            return String(value ?? "").replace(/[&<>"']/g, character => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            })[character]);
+
+        }
+
+
+        // Convert packing essentials into an array
+        function getPackingItems(value) {
+
+            if (!value) return [];
+
+            if (Array.isArray(value)) {
+                return value;
+            }
+
+            return String(value)
+                .split(",")
+                .map(item => item.trim())
+                .filter(Boolean);
+
+        }
+
+        // ==================================================
+// GENERATE WEATHER-BASED PACKING ESSENTIALS
+// ==================================================
+
+function renderPackingEssentials(destination, weatherData = null) {
+
+    const packingContainer = document.getElementById(
+        "packingEssentialsContent"
+    );
+
+    if (!packingContainer) return;
+
+    // Keep existing database packing essentials
+    const existingItems = getPackingItems(
+        destination.packing_essentials
+    );
+
+    // Add suggestions based on live weather
+    const weatherItems = [];
+
+    if (weatherData && weatherData.success) {
+
+        const temperature = Number(
+    weatherData.feels_like ?? weatherData.temperature
+);
+
+        const humidity = Number(weatherData.humidity);
+
+        const windSpeed = Number(weatherData.wind_speed);
+
+        const condition = String(
+            weatherData.condition || ""
+        ).toLowerCase();
+
+
+        // COLD WEATHER
+        if (temperature <= 15) {
+
+            weatherItems.push(
+                "Warm jacket",
+                "Sweater or thermal wear",
+                "Warm socks",
+                "Comfortable closed shoes"
+            );
+
+        }
+
+        // HOT WEATHER
+        else if (temperature >= 30) {
+
+            weatherItems.push(
+                "Lightweight cotton clothes",
+                "Sunscreen",
+                "Sunglasses",
+                "Cap or hat",
+                "Reusable water bottle"
+            );
+
+        }
+
+        // PLEASANT WEATHER
+        else if (temperature > 15 && temperature < 30) {
+
+            weatherItems.push(
+                "Comfortable clothing",
+                "Light jacket",
+                "Comfortable walking shoes"
+            );
+
+        }
+
+
+        // RAINY WEATHER
+        if (
+            condition.includes("rain") ||
+            condition.includes("drizzle") ||
+            condition.includes("thunder")
+        ) {
+
+            weatherItems.push(
+                "Umbrella",
+                "Raincoat",
+                "Waterproof footwear",
+                "Waterproof bag cover"
+            );
+
+        }
+
+
+        // HIGH HUMIDITY
+        if (humidity >= 80) {
+
+            weatherItems.push(
+                "Breathable quick-dry clothes"
+            );
+
+        }
+
+
+        // STRONG WIND
+        if (windSpeed >= 20) {
+
+            weatherItems.push(
+                "Windproof jacket"
+            );
+
+        }
+
+    }
+
+
+    // Combine database items and weather suggestions
+    const allItems = [
+        ...existingItems,
+        ...weatherItems
+    ];
+
+
+    // Remove duplicate suggestions
+    const uniqueItems = [
+        ...new Map(
+            allItems.map(item => [
+                String(item).trim().toLowerCase(),
+                String(item).trim()
+            ])
+        ).values()
+    ];
+
+
+    if (uniqueItems.length === 0) {
+
+        packingContainer.innerHTML = `
+            <p>Packing information is not available yet.</p>
+        `;
+
+        return;
+
+    }
+
+
+    packingContainer.innerHTML = `
+
+        <ul class="info-list">
+
+            ${uniqueItems.map(item => `
+                <li>${escapeHTML(item)}</li>
+            `).join("")}
+
+        </ul>
+
+        ${
+            weatherData && weatherData.success
+            ? `<p style="
+                    font-size: 12px;
+                    color: #82918d;
+                    margin-top: 12px;
+                ">
+                    Packing suggestions based on current weather.
+               </p>`
+            : `<p style="
+                    font-size: 12px;
+                    color: #82918d;
+                    margin-top: 12px;
+                ">
+                    Live weather unavailable. Showing saved packing essentials.
+               </p>`
+        }
+
+    `;
+
+}
+
+        // Display budget
+        function formatBudget(min, max) {
+
+            if (min != null && max != null) {
+                return `₹${Number(min).toLocaleString("en-IN")} - ₹${Number(max).toLocaleString("en-IN")}`;
+            }
+
+            if (min != null) {
+                return `Starting from ₹${Number(min).toLocaleString("en-IN")}`;
+            }
+
+            if (max != null) {
+                return `Up to ₹${Number(max).toLocaleString("en-IN")}`;
+            }
+
+            return "Budget information unavailable";
+
+        }
+
+
+        // Load destination details from Flask and MySQL
+        async function showDestination() {
+
+            if (!selectedDestination) {
+
+                destinationContent.innerHTML = `
+                    <p>Destination not selected. Please go back and select a destination.</p>
+                `;
+
+                return;
+            }
+
+            try {
+
+                let destinationData;
+
+                // Fetch details using the database ID
+                if (selectedDestination.id) {
+
+                    const response = await fetch(
+                        `${API_URL}/api/destinations/${selectedDestination.id}`
+                    );
+
+                    if (!response.ok) {
+                        throw new Error("Could not load destination details.");
+                    }
+
+                    destinationData = await response.json();
+
+                } else {
+
+                    // Fallback: find the destination by name
+                    const response = await fetch(
+                        `${API_URL}/api/destinations`
+                    );
+
+                    if (!response.ok) {
+                        throw new Error("Could not load destinations.");
+                    }
+
+                    const result = await response.json();
+
+                    const destinations = result.destinations || [];
+
+                    destinationData = destinations.find(
+                        destination =>
+                            destination.name.toLowerCase() ===
+                            selectedDestination.name.toLowerCase()
+                    );
+
+                    if (!destinationData) {
+                        throw new Error("Destination not found in database.");
+                    }
+
+                    // Fetch famous spots using its database ID
+                    const detailsResponse = await fetch(
+                        `${API_URL}/api/destinations/${destinationData.id}`
+                    );
+
+                    if (detailsResponse.ok) {
+                        destinationData = await detailsResponse.json();
+                    }
+
+                }
+
+                // Keep the latest database details
+                selectedDestination = {
+                    ...selectedDestination,
+                    ...destinationData
+                };
+
+                localStorage.setItem(
+                    "selectedDestination",
+                    JSON.stringify(selectedDestination)
+                );
+
+                displayDestination(selectedDestination);
+
+            } catch (error) {
+
+                console.error("Destination loading error:", error);
+
+                destinationContent.innerHTML = `
+                    <p>Unable to load destination details.
+                    Please make sure the Waymate backend is running.</p>
+                `;
+
+            }
+
+        }
+
+
+        // Display destination information
+        function displayDestination(destination) {
+
+            const name = escapeHTML(destination.name);
+
+            const location = escapeHTML(
+                destination.location || "Location unavailable"
+            );
+
+            const type = escapeHTML(
+                destination.destination_type || "Destination"
+            );
+
+            const description = escapeHTML(
+                destination.description || "No description available."
+            );
+
+
+            const budget = formatBudget(
+                destination.budget_min,
+                destination.budget_max
+            );
+
+            const days = destination.recommended_days;
+const durationText =
+    days != null && Number(days) > 0
+        ? `${Number(days)} days`
+        : "Duration not specified";
+
+            const image = destination.image_url || "";
+
+            const packingItems = getPackingItems(
+                destination.packing_essentials
+            );
+
+            const spots = destination.spots || [];
+
+            
+const mapSearch = destination.latitude && destination.longitude
+    ? `${destination.latitude},${destination.longitude}`
+    : `${destination.name}, ${destination.location || "India"}`;
+
+// Get the starting city saved from the recommendation form
+let startingCity = "";
+
+try {
+    const preferences = JSON.parse(
+        localStorage.getItem("travelPreferences") || "{}"
+    );
+
+    startingCity = preferences.startingCity || "";
+
+} catch (error) {
+    console.error("Could not get starting city:", error);
+}
+
+// Create Google Maps directions URL
+const mapsURL = startingCity
+    ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(startingCity)}&destination=${encodeURIComponent(mapSearch)}&travelmode=driving`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapSearch)}`;
+
+
+            destinationContent.innerHTML = `
+
+                <div class="destination-hero">
+
+                    ${
+                        image
+                        ? `<img src="${escapeHTML(image)}"
+                                alt="${name}"
+                                onerror="this.style.display='none'">`
+                        : ""
+                    }
+
+                </div>
+
+
+                <div class="destination-main-info">
+
+                    <h1>${name}</h1>
+
+                    <p class="destination-location">
+                        📍 ${location}
+                    </p>
+
+                    <span class="destination-type">
+                        ${type}
+                    </span>
+
+                    <p class="destination-description">
+                        ${description}
+                    </p>
+
+
+                    <div class="destination-buttons">
+
+                        <button
+    id="saveButton"
+    class="save-button"
+    onclick="toggleSave()"
+>
+    ♡ Save Destination
+</button>
+
+                        <button
+                            type="button"
+                            class="upcoming-trip-button"
+                            onclick="openUpcomingTripForm()"
+                        >
+                            ✈ Upcoming Trips
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="details-grid">
+
+                    <div class="detail-box">
+                        <h3>💰 Estimated Budget</h3>
+                        <p>${budget}</p>
+                    </div>
+
+                    <div class="detail-box">
+                        <h3>📅 Recommended Days</h3>
+                        <p>${escapeHTML(durationText)}</p>
+                    </div>
+
+                    <div class="detail-box" id="destinationWeather">
+
+    <h3>🌤️ Current Weather</h3>
+
+    <p>Loading weather information...</p>
+
+</div>
+
+                </div>
+
+
+                <div class="detail-box">
+
+    <h2>🎒 Packing Essentials</h2>
+
+    <div id="packingEssentialsContent">
+        <p>Loading weather-based packing suggestions...</p>
+    </div>
+
+    <a href="${mapsURL}"
+       target="_blank"
+       rel="noopener noreferrer"
+       class="maps-button">
+        📍 View on Google Maps
+    </a>
+
+</div>
+                <div class="famous-spots">
+
+                    <h2>📸 Famous Places to Visit</h2>
+
+                    ${
+                        spots.length
+                        ? spots.map(spot => `
+
+                            <div class="detail-box">
+
+                                ${
+                                    spot.image_url
+                                    ? `<img src="${escapeHTML(spot.image_url)}"
+                                            alt="${escapeHTML(spot.spot_name)}"
+                                            onerror="this.style.display='none'">`
+                                    : ""
+                                }
+
+                                <h3>${escapeHTML(spot.spot_name)}</h3>
+
+                                <p>
+    ${escapeHTML(
+        spot.description || "Explore this famous place."
+    )}
+</p>
+
+<a
+    href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+        `${spot.spot_name}, ${destination.name}, ${destination.location || "India"}`
+    )}"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="maps-button"
+>
+    ⭐ View Ratings & Reviews on Google Maps ↗
+</a>
+                            </div>
+
+                        `).join("")
+                        : `<p>Famous spots information is not available yet.</p>`
+                    }
+
+                </div>
+
+            `;
+
+            updateSaveButton();
+            loadDestinationWeather(destination.id);
+        }
+
+        // ==================================================
+// LOAD LIVE WEATHER FOR DESTINATION
+// ==================================================
+
+async function loadDestinationWeather(destinationId) {
+
+    const weatherBox = document.getElementById(
+        "destinationWeather"
+    );
+
+    if (!weatherBox) return;
+
+    try {
+
+        const response = await fetch(
+            `${API_URL}/api/destinations/${destinationId}/weather`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+
+            throw new Error(
+                data.message || "Weather information unavailable"
+            );
+
+        }
+        // Update packing essentials using live weather
+renderPackingEssentials(selectedDestination, data);
+        // Weather icon based on current condition
+        const condition = String(data.condition || "").toLowerCase();
+
+        let weatherIcon = "🌤️";
+
+        if (condition.includes("rain") ||
+            condition.includes("drizzle")) {
+
+            weatherIcon = "🌧️";
+
+        } else if (condition.includes("cloud")) {
+
+            weatherIcon = "☁️";
+
+        } else if (condition.includes("snow")) {
+
+            weatherIcon = "❄️";
+
+        } else if (condition.includes("thunder")) {
+
+            weatherIcon = "⛈️";
+
+        } else if (condition.includes("clear") ||
+                   condition.includes("sun")) {
+
+            weatherIcon = "☀️";
+
+        } else if (condition.includes("fog")) {
+
+            weatherIcon = "🌫️";
+
+        }
+
+        const temperature =
+            Number(data.temperature).toFixed(1);
+
+        const feelsLike =
+            Number(data.feels_like).toFixed(1);
+
+        const humidity =
+            data.humidity;
+
+        const windSpeed =
+            data.wind_speed;
+
+        const unit =
+            data.temperature_unit || "°C";
+
+        const windUnit =
+            data.wind_speed_unit || "km/h";
+
+
+        // Display current weather
+        weatherBox.innerHTML = `
+
+            <h3>🌤️ Current Weather</h3>
+
+            <div style="
+                display: flex;
+                align-items: center;
+                gap: 18px;
+                margin-top: 15px;
+            ">
+
+                <span style="font-size: 42px;">
+                    ${weatherIcon}
+                </span>
+
+                <div>
+
+                    <h2 style="
+                        font-size: 32px;
+                        margin: 0;
+                        color: #159b91;
+                    ">
+                        ${escapeHTML(temperature)}${escapeHTML(unit)}
+                    </h2>
+
+                    <p style="margin: 4px 0;">
+                        ${escapeHTML(data.condition || "Current conditions unavailable")}
+                    </p>
+
+                    <p style="margin: 4px 0; color: #60716d;">
+                        Feels like ${escapeHTML(feelsLike)}${escapeHTML(unit)}
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div style="
+                display: flex;
+                gap: 35px;
+                flex-wrap: wrap;
+                margin-top: 18px;
+            ">
+
+                <p>
+                    💧 <strong>${escapeHTML(humidity)}%</strong>
+                    <br>
+                    Humidity
+                </p>
+
+                <p>
+                    💨 <strong>${escapeHTML(windSpeed)} ${escapeHTML(windUnit)}</strong>
+                    <br>
+                    Wind Speed
+                </p>
+
+            </div>
+
+            <p style="
+                font-size: 12px;
+                color: #82918d;
+                margin-top: 10px;
+            ">
+                Live weather powered by ${escapeHTML(data.source || "Weather service")}
+            </p>
+
+        `;
+
+    } catch (error) {
+
+        console.error("Weather loading error:", error);
+        // Preserve database packing essentials if weather fails
+renderPackingEssentials(selectedDestination, null);
+        weatherBox.innerHTML = `
+
+            <h3>🌤️ Current Weather</h3>
+
+            <p>Weather information is currently unavailable.</p>
+
+        `;
+
+    }
+
+}
+
+        // Save or remove destination using MySQL
+        async function toggleSave() {
+
+            const userId = localStorage.getItem("user_id");
+
+            if (!userId) {
+
+                alert("Please login to save destinations.");
+
+                window.location.href = "login.html";
+
+                return;
+            }
+
+            if (!selectedDestination || !selectedDestination.id) {
+
+                alert("Destination information is unavailable.");
+
+                return;
+            }
+
+            const button = document.getElementById("saveButton");
+
+            const alreadySaved = button.dataset.saved === "true";
+
+            button.disabled = true;
+
+            try {
+
+                const response = await fetch(`${API_URL}/api/saved-places`, {
+
+                    method: alreadySaved ? "DELETE" : "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        user_id: Number(userId),
+                        destination_id: Number(selectedDestination.id)
+                    })
+
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.message || "Unable to update saved destination."
+                    );
+                }
+
+                await updateSaveButton();
+
+            } catch (error) {
+
+                console.error("Save destination error:", error);
+
+                alert(error.message || "Could not connect to the backend.");
+
+            } finally {
+
+                button.disabled = false;
+
+            }
+
+        }
+
+
+        // Check saved status from MySQL
+        async function updateSaveButton() {
+
+            const button = document.getElementById("saveButton");
+
+            if (!button || !selectedDestination) return;
+
+            const userId = localStorage.getItem("user_id");
+
+            if (!userId) {
+
+                button.innerHTML = "♡ Save Destination";
+
+                button.dataset.saved = "false";
+
+                return;
+            }
+
+            try {
+
+                const response = await fetch(
+                    `${API_URL}/api/saved-places/${userId}`
+                );
+
+                if (!response.ok) {
+                    throw new Error("Unable to fetch saved destinations.");
+                }
+
+                const data = await response.json();
+
+                const savedDestinations = data.saved_places || [];
+
+                const alreadySaved = savedDestinations.some(
+                    item => Number(item.id) === Number(selectedDestination.id)
+                );
+
+                button.dataset.saved = alreadySaved ? "true" : "false";
+
+                button.innerHTML = alreadySaved
+                    ? "♥ Saved"
+                    : "♡ Save Destination";
+
+            } catch (error) {
+
+                console.error("Checking saved destination error:", error);
+
+                button.innerHTML = "♡ Save Destination";
+
+                button.dataset.saved = "false";
+
+            }
+
+        }
+
+
+        // OPEN UPCOMING TRIP FORM
+        function openUpcomingTripForm() {
+
+            const userId = localStorage.getItem("user_id");
+
+            if (!userId) {
+
+                alert("Please login to add an upcoming trip.");
+
+                window.location.href = "login.html";
+
+                return;
+            }
+
+            if (!selectedDestination || !selectedDestination.id) {
+
+                alert("Destination information is unavailable.");
+
+                return;
+            }
+
+            const form = document.getElementById("upcomingTripForm");
+
+            form.reset();
+
+            const today = new Date();
+
+            const localToday = [
+                today.getFullYear(),
+                String(today.getMonth() + 1).padStart(2, "0"),
+                String(today.getDate()).padStart(2, "0")
+            ].join("-");
+
+            document.getElementById("newTripStart").min = localToday;
+
+            document.getElementById("newTripEnd").min = localToday;
+
+            document.getElementById("upcomingTripModal").classList.add("show");
+
+        }
+
+
+        // CLOSE UPCOMING TRIP FORM
+        function closeUpcomingTripForm() {
+
+            document
+                .getElementById("upcomingTripModal")
+                .classList.remove("show");
+
+        }
+
+
+        // SAVE UPCOMING TRIP TO MYSQL
+        async function saveUpcomingTrip(event) {
+
+            event.preventDefault();
+
+            const userId = localStorage.getItem("user_id");
+
+            if (!userId) {
+
+                alert("Please login to add an upcoming trip.");
+
+                window.location.href = "login.html";
+
+                return;
+            }
+
+            if (!selectedDestination || !selectedDestination.id) {
+
+                alert("Destination information is unavailable.");
+
+                return;
+            }
+
+            const startDate = document.getElementById("newTripStart").value;
+
+            const endDate = document.getElementById("newTripEnd").value;
+
+            const budgetValue = document.getElementById("newTripBudget").value;
+
+            const notes = document.getElementById("newTripNotes").value.trim();
+
+
+            if (!startDate || !endDate) {
+
+                alert("Please select both Start Date and End Date.");
+
+                return;
+            }
+
+            if (endDate < startDate) {
+
+                alert("End Date cannot be earlier than Start Date.");
+
+                return;
+            }
+
+
+            // Calculate number of trip days, including start and end dates
+            const start = new Date(startDate + "T00:00:00");
+
+            const end = new Date(endDate + "T00:00:00");
+
+            const numberOfDays = Math.round(
+                (Date.UTC(end.getFullYear(), end.getMonth(), end.getDate()) -
+                 Date.UTC(start.getFullYear(), start.getMonth(), start.getDate()))
+                / (1000 * 60 * 60 * 24)
+            ) + 1;
+
+
+            const saveButton = document.getElementById(
+                "saveUpcomingTripButton"
+            );
+
+            saveButton.disabled = true;
+
+            saveButton.textContent = "Saving...";
+
+
+            try {
+
+                const response = await fetch(`${API_URL}/api/my-trips`, {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        user_id: Number(userId),
+
+                        destination_id: Number(selectedDestination.id),
+
+                        trip_type:
+                            selectedDestination.destination_type ||
+                            selectedDestination.type ||
+                            null,
+
+                        number_of_people: 1,
+
+                        number_of_days: numberOfDays,
+
+                        budget: budgetValue ? Number(budgetValue) : null,
+
+                        start_date: startDate,
+
+                        end_date: endDate,
+
+                        notes: notes
+
+                    })
+
+                });
+
+
+                const data = await response.json();
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.message || "Unable to save your upcoming trip."
+                    );
+
+                }
+
+
+                closeUpcomingTripForm();
+
+                alert(
+                    `${selectedDestination.name} has been added to your Upcoming Trips!`
+                );
+
+
+            } catch (error) {
+
+                console.error("Upcoming trip error:", error);
+
+                alert(
+                    error.message || "Could not connect to the Waymate backend."
+                );
+
+            } finally {
+
+                saveButton.disabled = false;
+
+                saveButton.textContent = "Save Changes";
+
+            }
+
+        }
+
+
+        // Close modal when clicking outside the form
+        document
+            .getElementById("upcomingTripModal")
+            .addEventListener("click", function(event) {
+
+                if (event.target === this) {
+                    closeUpcomingTripForm();
+                }
+
+            });
+
+
+        // Load the page
+        showDestination();
+
+    </script>
+
+
+    <!-- BACK BUTTON -->
+
+    <script>
+    const backButton = document.getElementById("backButton");
+
+    if (backButton) {
+
+        const params = new URLSearchParams(window.location.search);
+        const pageSource = params.get("source");
+
+        const referrer = document.referrer || "";
+        const destinationSource = localStorage.getItem("destinationSource");
+
+        // Return to the same recommendation results
+        if (
+            pageSource === "recommendations" ||
+            destinationSource === "recommendations"
+        ) {
+            backButton.href =
+                "destination-choice.html?restore=recommendations";
+        }
+
+        // Came from Explore
+        else if (referrer.includes("explore.html")) {
+            backButton.href = "explore.html";
+        }
+
+        // Came from Home
+        else if (referrer.includes("home.html")) {
+            backButton.href = "home.html";
+        }
+
+        // Fallback
+        else if (destinationSource === "explore") {
+            backButton.href = "explore.html";
+        }
+
+        else {
+            backButton.href = "home.html";
+        }
+    }
+</script>
+
+</body>
+
+</html>

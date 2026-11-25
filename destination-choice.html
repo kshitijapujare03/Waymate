@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waymate - Plan Your Journey</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f8f4;
+            color: #26352b;
+        }
+
+        .choice-page {
+            min-height: 100vh;
+        }
+
+        .choice-container {
+            width: 90%;
+            max-width: 1100px;
+            margin: auto;
+            padding: 45px 0 60px;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 38px;
+        }
+
+        .welcome-section h1 {
+            font-size: 34px;
+            margin-bottom: 12px;
+            color: #26352b;
+        }
+
+        .welcome-section p {
+            color: #66736b;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .choice-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+
+        .choice-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.25s ease;
+        }
+
+        .choice-card:hover {
+            transform: translateY(-5px);
+            border-color: #2e7d32;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+        }
+
+        .choice-card img {
+            width: 100%;
+            height: 230px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .choice-card-content {
+            padding: 25px;
+            text-align: center;
+        }
+
+        .choice-card-content h2 {
+            font-size: 23px;
+            margin: 0 0 12px;
+            color: #26352b;
+        }
+
+        .choice-card-content p {
+            color: #66736b;
+            font-size: 14px;
+            line-height: 1.6;
+            min-height: 45px;
+        }
+
+        .choice-button {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: #2e7d32;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .choice-button:hover {
+            background: #256628;
+        }
+
+        /* PREFERENCE FORM */
+
+        .preference-section {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+            margin-top: 25px;
+        }
+
+        .preference-section h2 {
+            text-align: center;
+            margin-top: 0;
+            color: #26352b;
+            font-size: 27px;
+        }
+
+        .form-description {
+            text-align: center;
+            color: #66736b;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 22px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 9px;
+            color: #35463a;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #d6ddd8;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #2e7d32;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .back-button {
+            padding: 12px 24px;
+            border: 1px solid #2e7d32;
+            border-radius: 8px;
+            background: white;
+            color: #2e7d32;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .submit-button {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            background: #2e7d32;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .submit-button:hover {
+            background: #256628;
+        }
+
+        /* RECOMMENDATIONS SECTION */
+
+        .recommendations-section {
+            display: none;
+            margin-top: 40px;
+        }
+
+        .recommendations-section h2 {
+            text-align: center;
+            font-size: 27px;
+            color: #26352b;
+        }
+
+        .recommendations-description {
+            text-align: center;
+            color: #66736b;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        /* RECOMMENDATION GRID */
+
+        .recommendation-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 22px;
+            align-items: stretch;
+            grid-auto-rows: 1fr;
+        }
+
+        .recommendation-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-width: 0;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .recommendation-card img {
+            width: 100%;
+            height: 180px;
+            min-height: 180px;
+            object-fit: cover;
+            display: block;
+            flex-shrink: 0;
+        }
+
+        .recommendation-content {
+            padding: 17px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .recommendation-content h3 {
+            margin: 0 0 8px;
+            color: #26352b;
+            min-height: 27px;
+        }
+
+        .recommendation-content > p {
+            color: #66736b;
+            font-size: 13px;
+            line-height: 1.5;
+            margin: 0 0 12px;
+            min-height: 40px;
+        }
+
+        /* MATCH PERCENTAGE BOX */
+
+        .match-section {
+            margin: 0 0 15px;
+            padding: 13px;
+            background: #f1f7f0;
+            border-radius: 9px;
+            height: 153px;
+            min-height: 153px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .match-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 9px;
+            min-height: 25px;
+            flex-shrink: 0;
+        }
+
+        .match-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #35463a;
+        }
+
+        .match-percentage {
+            font-size: 19px;
+            font-weight: bold;
+            color: #2e7d32;
+            white-space: nowrap;
+        }
+
+        .match-bar-background {
+            width: 100%;
+            height: 9px;
+            min-height: 9px;
+            background: #dce8dc;
+            border-radius: 20px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .match-bar {
+            height: 100%;
+            background: #2e7d32;
+            border-radius: 20px;
+            transition: width 0.7s ease;
+        }
+
+        .match-description {
+            font-size: 12px;
+            color: #66736b;
+            margin-top: 8px;
+            line-height: 1.5;
+            overflow: hidden;
+        }
+
+        /* BUDGET AND RATING */
+
+        .recommendation-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            border-top: 1px solid #edf0ed;
+            padding-top: 12px;
+            min-height: 43px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: auto;
+        }
+
+        /* RECOMMENDED DAYS */
+
+        .recommendation-content > p:last-of-type {
+            min-height: 25px;
+            margin: 8px 0 12px;
+        }
+
+        /* SELECT DESTINATION BUTTON */
+
+        .select-destination {
+            width: 100%;
+            margin-top: auto;
+            padding: 11px;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 14px;
+            min-height: 43px;
+            flex-shrink: 0;
+        }
+
+        .select-destination:hover {
+            background: #256628;
+        }
+
+        /* KEEP IN MY TRAVEL WALL BUTTON */
+
+        .save-travel-wall {
+            width: 100%;
+            margin-top: 9px;
+            padding: 11px;
+            background: #e4f6f3;
+            color: #087f78;
+            border: 1px solid #159b91;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            min-height: 43px;
+            transition: 0.2s;
+        }
+
+        .save-travel-wall:hover {
+            background: #d1eee9;
+        }
+
+        .save-travel-wall.saved {
+            background: #159b91;
+            color: white;
+            border-color: #159b91;
+            cursor: default;
+        }
+
+        .no-recommendations {
+            display: none;
+            text-align: center;
+            padding: 25px;
+            background: white;
+            border-radius: 10px;
+            color: #66736b;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #66736b;
+        }
+
+        /* TABLET */
+
+        @media (max-width: 750px) {
+            .choice-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .recommendation-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                grid-auto-rows: auto;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .recommendation-card {
+                min-height: 100%;
+            }
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 500px) {
+            .choice-container {
+                width: 92%;
+            }
+
+            .welcome-section h1 {
+                font-size: 27px;
+            }
+
+            .recommendation-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .preference-section {
+                padding: 22px 16px;
+            }
+
+            .match-section {
+                height: auto;
+                min-height: 140px;
+            }
+        }
+
+        /* SHARED WAYMATE HEADER AND IMAGE BANNER */
+
+.navbar {
+    display: flex;
+    height: 75px;
+    background: white;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    position: relative;
+    z-index: 10;
+}
+
+.navbar .logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #0b6670;
+}
+
+.navbar .logo span {
+    font-size: 30px;
+    margin-right: 6px;
+}
+
+.navbar .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.navbar .nav-links a {
+    font-size: 15px;
+    color: #24565d;
+    text-decoration: none;
+}
+
+.navbar .nav-links a:hover {
+    color: #0b8994;
+}
+
+/* Scenic banner below navbar */
+
+.page-banner {
+    height: 65px;
+    width: 100%;
+    background-image:
+        url("https://images.pexels.com/photos/29120353/pexels-photo-29120353/free-photo-of-stunning-beach-and-cliffs-at-nusa-penida-bali.jpeg");
+    background-size: cover;
+    background-position: center 45%;
+    background-repeat: no-repeat;
+}
+
+@media (max-width: 650px) {
+    .navbar {
+        height: auto;
+        padding: 18px 20px;
+    }
+
+    .navbar .nav-links {
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .navbar .nav-links a {
+        font-size: 13px;
+    }
+}
+    </style>
+</head>
+
+<body>
+
+<div class="choice-page">
+
+    <!-- NAVBAR -->
+
+    <!-- SHARED NAVBAR -->
+
+<nav class="navbar">
+
+    <div class="logo">
+        <span>✈</span> Waymate
+    </div>
+
+    <div class="nav-links">
+        <a href="home.html">Home</a>
+        <a href="destination-choice.html" class="active">Explore</a>
+        <a href="trips.html">My Trips</a>
+        <a href="account.html">My Account</a>
+
+        
+    </div>
+
+</nav>
+
+<!-- SCENIC IMAGE BANNER -->
+
+<section class="page-banner"></section>
+
+    <main class="choice-container">
+
+        <!-- WELCOME -->
+
+        <section class="welcome-section">
+
+            <h1>Let's Plan Your Next Adventure!</h1>
+
+            <p>
+                Every great journey begins with a choice.
+                Tell us what you have in mind and let Waymate
+                help you plan your perfect trip.
+            </p>
+
+        </section>
+
+        <!-- TWO CHOICES -->
+
+        <section class="choice-cards" id="choiceCards">
+
+            <div class="choice-card" onclick="goToExplore()">
+
+                <img
+                    src="https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=900&q=80"
+                    alt="Beautiful beach destination">
+
+                <div class="choice-card-content">
+
+                    <h2>I Have Decided My Destination</h2>
+
+                    <p>
+                        Already have a place in mind?
+                        Explore destinations, discover their details
+                        and start planning your trip.
+                    </p>
+
+                    <button class="choice-button">
+                        Explore Destinations
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="choice-card" onclick="showPreferenceForm()">
+
+                <img
+                    src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=900&q=80"
+                    alt="Beautiful mountain destination">
+
+                <div class="choice-card-content">
+
+                    <h2>Help Me Choose a Destination</h2>
+
+                    <p>
+                        Not sure where to go?
+                        Share your travel preferences and
+                        get personalized destination suggestions.
+                    </p>
+
+                    <button class="choice-button">
+                        Get Recommendations
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- PREFERENCE FORM -->
+
+        <section class="preference-section" id="preferenceSection">
+
+            <h2>Tell Us About Your Trip</h2>
+
+            <p class="form-description">
+                Fill in your preferences so Waymate can
+                recommend destinations that suit you.
+            </p>
+
+            <form id="preferenceForm">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="startingCity">Starting City</label>
+                        <input
+                            type="text"
+                            id="startingCity"
+                            placeholder="Enter your city"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="travelDays">How many days do you have?</label>
+                        <select id="travelDays" required>
+                            <option value="">Select duration</option>
+                            <option value="2">2 Days</option>
+                            <option value="3">3 Days</option>
+                            <option value="4">4 Days</option>
+                            <option value="5">5 Days</option>
+                            <option value="7">7 Days</option>
+                            <option value="10">10 Days</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="budget">Your Budget (per person)</label>
+                        <select id="budget" required>
+                            <option value="">Select your budget</option>
+                            <option value="4000">Under ₹4,000</option>
+                            <option value="5000">₹4,000 - ₹5,000</option>
+                            <option value="7000">₹5,000 - ₹7,000</option>
+                            <option value="10000">₹7,000 - ₹10,000</option>
+                            <option value="15000">₹10,000 - ₹15,000</option>
+                            <option value="20000">Above ₹15,000</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="travelType">What kind of trip do you prefer?</label>
+                        <select id="travelType" required>
+                            <option value="">Select preference</option>
+                            <option value="Beach">Beach</option>
+                            <option value="Nature">Nature</option>
+                            <option value="Hill Station">Hill Station</option>
+                            <option value="Historical">Historical & Cultural</option>
+                            <option value="Adventure">Adventure</option>
+                            <option value="Religious">Religious & Spiritual</option>
+                            <option value="Any">Anything / No Preference</option>
+                        </select>
+                    </div>
+
+<div class="form-group">
+    <label for="travellers">Number of Travellers</label>
+    <select id="travellers" required>
+        <option value="">Select travellers</option>
+        <option value="1">1 Person</option>
+        <option value="2">2 People</option>
+        <option value="3">3 People</option>
+        <option value="4">4 People</option>
+        <option value="5">5 People</option>
+        <option value="6">6 or More People</option>
+    </select>
+</div>
+
+
+                    <div class="form-group">
+                        <label for="travelCompany">Who are you travelling with?</label>
+                        <select id="travelCompany" required>
+                            <option value="">Select companion</option>
+                            <option value="Solo">Solo</option>
+                            <option value="Friends">Friends</option>
+                            <option value="Family">Family</option>
+                            <option value="Partner">Partner</option>
+                        </select>
+                    </div>
+                    
+
+
+                </div>
+
+                <div class="form-actions">
+
+                    <button
+                        type="button"
+                        class="back-button"
+                        onclick="backToChoices()">
+                        ← Back
+                    </button>
+
+                    <button type="submit" class="submit-button">
+                        Find My Destinations
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+        <!-- RECOMMENDATIONS -->
+
+        <section class="recommendations-section" id="recommendationsSection">
+
+            <h2>Your Recommended Destinations</h2>
+
+            <p class="recommendations-description">
+                Here are your top destinations ranked according
+                to how closely they match your travel preferences.
+                Higher percentages indicate a closer match.
+            </p>
+
+            <div class="recommendation-grid" id="recommendationGrid"></div>
+
+            <div class="no-recommendations" id="noRecommendations">
+                No destinations found.
+            </div>
+
+            <div class="form-actions">
+
+                <button
+                    type="button"
+                    class="back-button"
+                    onclick="backToForm()">
+                    ← Back to Choices
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+
+    <footer class="footer">
+        <p>Your journey, our recommendation.</p>
+    </footer>
+
+</div>
+
+<script>
+
+const API_URL = "http://127.0.0.1:5000";
+
+let destinations = [];
+
+// MAP DATABASE DESTINATION FIELDS
+
+function mapDestination(item) {
+    return {
+        id: item.id,
+        name: item.name,
+        type: item.destination_type || "Other",
+        description: item.description || "Explore this destination.",
+
+        budget_min: item.budget_min == null
+            ? null
+            : Number(item.budget_min),
+
+        budget_max: item.budget_max == null
+            ? null
+            : Number(item.budget_max),
+
+        days: Number(item.recommended_days) || 3,
+        rating: Number(item.rating) || 0,
+        image: item.image_url || "",
+        location: item.location || "",
+        weather: item.weather || "",
+        packing_essentials: item.packing_essentials || "",
+        latitude: item.latitude,
+        longitude: item.longitude
+    };
+}
+
+
+// LOAD DESTINATIONS FROM DATABASE
+async function loadDestinations() {
+    try {
+        const response = await fetch(`${API_URL}/api/destinations`);
+
+        if (!response.ok) {
+            throw new Error("Could not load destinations.");
+        }
+
+        const data = await response.json();
+
+        const destinationList = Array.isArray(data)
+            ? data
+            : (data.destinations || []);
+
+        destinations = (data.destinations || []).map(mapDestination);
+
+populatePreferenceFilters();
+
+console.log("Database destinations loaded:", destinations.length);
+
+    } catch (error) {
+        console.error("Destination loading failed:", error);
+
+        alert("Unable to load destinations. Please make sure the Waymate backend is running.");
+    }
+}
+
+
+// POPULATE FORM CATEGORIES AND BUDGETS FROM DATABASE
+
+function populatePreferenceFilters() {
+
+    const travelType = document.getElementById("travelType");
+    const budgetSelect = document.getElementById("budget");
+
+    // USE THE SAME CATEGORIES AS EXPLORE
+
+    if (travelType) {
+        const categories = [
+            ...new Set(
+                destinations
+                    .map(destination => destination.type)
+                    .filter(Boolean)
+            )
+        ].sort();
+
+        travelType.innerHTML = `
+            <option value="">Select preference</option>
+            <option value="Any">Anything / No Preference</option>
+            ${categories.map(category => `
+                <option value="${category}">
+                    ${category}
+                </option>
+            `).join("")}
+        `;
+    }
+
+    // GENERATE BUDGET OPTIONS FROM DATABASE
+
+    if (budgetSelect) {
+        const allBudgets = destinations.flatMap(destination => [
+            Number(destination.budget_min),
+            Number(destination.budget_max)
+        ]).filter(amount =>
+            Number.isFinite(amount) && amount > 0
+        );
+
+        const highestBudget = allBudgets.length
+            ? Math.max(...allBudgets)
+            : 0;
+
+        const highestLimit = Math.ceil(highestBudget / 5000) * 5000;
+
+        const budgetOptions = [];
+
+        for (let amount = 5000; amount <= highestLimit; amount += 5000) {
+            budgetOptions.push(amount);
+        }
+
+        budgetSelect.innerHTML = `
+            <option value="">Select your budget</option>
+            ${budgetOptions.map(amount => `
+                <option value="${amount}">
+                    Up to ₹${amount.toLocaleString("en-IN")}
+                </option>
+            `).join("")}
+            <option value="unlimited">No Budget Limit</option>
+        `;
+    }
+}
+
+
+// OPTION 1: ALREADY DECIDED DESTINATION
+function goToExplore() {
+    sessionStorage.removeItem("waymateExploreState");
+
+    localStorage.setItem("destinationSource", "explore");
+    window.location.href = "explore.html";
+}
+
+// OPTION 2: SHOW PREFERENCE FORM
+function showPreferenceForm() {
+    document.getElementById("choiceCards").style.display = "none";
+    document.getElementById("recommendationsSection").style.display = "none";
+    document.getElementById("preferenceSection").style.display = "block";
+
+    document.getElementById("preferenceSection").scrollIntoView({
+        behavior: "smooth"
+    });
+}
+
+// BACK TO TWO CHOICES
+function backToChoices() {
+    document.getElementById("preferenceSection").style.display = "none";
+    document.getElementById("recommendationsSection").style.display = "none";
+    document.getElementById("choiceCards").style.display = "grid";
+
+    document.getElementById("choiceCards").scrollIntoView({
+        behavior: "smooth"
+    });
+}
+
+function backToForm() {
+    document.getElementById("recommendationsSection").style.display = "none";
+    document.getElementById("choiceCards").style.display = "none";
+    document.getElementById("preferenceSection").style.display = "block";
+
+    document.getElementById("preferenceSection").scrollIntoView({
+        behavior: "smooth"
+    });
+}
+
+
+ // CONTROL VALID TRAVELLER AND COMPANION COMBINATIONS
+
+const peopleSelect = document.getElementById("travellers");
+const companionSelect = document.getElementById("travelCompany");
+
+function updateTravelCombination(changedField) {
+
+    const companion = companionSelect.value;
+
+    // When companion is selected, adjust traveller count
+    if (changedField === "companion") {
+
+        if (companion === "Solo") {
+            peopleSelect.value = "1";
+        }
+
+        else if (companion === "Partner") {
+            peopleSelect.value = "2";
+        }
+
+        else if (
+            companion === "Friends" ||
+            companion === "Family"
+        ) {
+            if (Number(peopleSelect.value) < 2) {
+                peopleSelect.value = "2";
+            }
+        }
+    }
+
+    const selectedPeople = Number(peopleSelect.value);
+
+    // Enable or disable companion options
+    Array.from(companionSelect.options).forEach(option => {
+
+        if (option.value === "") {
+            option.disabled = false;
+        }
+
+        else if (option.value === "Solo") {
+            option.disabled = selectedPeople !== 1;
+        }
+
+        else if (
+            option.value === "Partner" ||
+            option.value === "Friends" ||
+            option.value === "Family"
+        ) {
+            option.disabled = selectedPeople < 2;
+        }
+    });
+
+    // When traveller count changes, select a valid companion
+    if (changedField === "people") {
+
+        if (selectedPeople === 1) {
+            companionSelect.value = "Solo";
+        }
+
+        else if (companionSelect.value === "Solo") {
+            companionSelect.value = "Friends";
+        }
+    }
+}
+
+// Run when number of travellers changes
+peopleSelect.addEventListener("change", function () {
+    updateTravelCombination("people");
+});
+
+// Run when companion changes
+companionSelect.addEventListener("change", function () {
+    updateTravelCombination("companion");
+});
+
+// Set the correct option when the page loads
+updateTravelCombination("people");
+
+// MAP FORM CATEGORY TO DATABASE CATEGORY
+
+function matchesTravelType(destination, preferredType) {
+
+    if (!preferredType || preferredType === "Any") {
+        return true;
+    }
+
+    return destination.type === preferredType;
+}
+
+
+// COMPANION SUITABILITY
+function getCompanionScore(destination, companion) {
+    const type = (destination.type || "").toLowerCase();
+    const description = (destination.description || "").toLowerCase();
+
+    const text = `${type} ${description}`;
+
+    const suitability = {
+        Solo: {
+            adventure: 3,
+            nature: 3,
+            heritage: 2,
+            religious: 2
+        },
+        Friends: {
+            adventure: 4,
+            beach: 3,
+            nature: 3,
+            mountain: 3
+        },
+        Family: {
+            heritage: 3,
+            religious: 3,
+            nature: 3,
+            beach: 2
+        },
+        Partner: {
+            nature: 3,
+            beach: 3,
+            mountain: 3,
+            heritage: 2
+        }
+    };
+
+    if (!companion || !suitability[companion]) return 0;
+
+    const preferences = suitability[companion];
+
+    let score = 0;
+
+    for (const keyword in preferences) {
+        if (text.includes(keyword)) {
+            score = Math.max(score, preferences[keyword]);
+        }
+    }
+
+    return score;
+}
+
+
+// GROUP SIZE SUITABILITY
+function getGroupSizeScore(travellers) {
+    const count = Number(travellers);
+
+    if (!Number.isFinite(count) || count < 1) return 0;
+
+    if (count === 1) return 2;
+    if (count === 2) return 3;
+    if (count <= 4) return 4;
+    if (count <= 6) return 3;
+
+    return 2;
+}
+
+
+function calculatePreferenceScore(destination, preferences) {
+
+    const companionScore = getCompanionScore(
+        destination,
+        preferences.companion
+    );
+
+    const groupScore = getGroupSizeScore(
+        preferences.travellers
+    );
+
+    // Keep the two new factors as additional ranking points.
+    return (companionScore * 5) + (groupScore * 3);
+}
+
+
+// GET SAVED DESTINATIONS
+function getSavedDestinations() {
+    try {
+        const saved = JSON.parse(
+            localStorage.getItem("savedDestinations") || "[]"
+        );
+
+        return Array.isArray(saved) ? saved : [];
+
+    } catch (error) {
+        console.error("Could not read saved destinations:", error);
+        return [];
+    }
+}
+
+function isDestinationInTravelWall(destinationName) {
+    return getSavedDestinations().some(destination =>
+        (destination.name || "").toLowerCase() === destinationName.toLowerCase()
+    );
+}
+
+// SAVE TO TRAVEL WALL
+function saveToTravelWall(destination, button) {
+    const savedDestinations = getSavedDestinations();
+
+    const alreadySaved = savedDestinations.some(item =>
+        (item.name || "").toLowerCase() === destination.name.toLowerCase()
+    );
+
+    if (alreadySaved) {
+        button.textContent = "✓ Saved to My Travel Wall";
+        button.classList.add("saved");
+        button.disabled = true;
+        return;
+    }
+
+    savedDestinations.push({
+        ...destination,
+        travelWallStatus: "want_to_visit",
+        visited: false,
+        personalPhoto: null,
+        savedAt: new Date().toISOString()
+    });
+
+    localStorage.setItem(
+        "savedDestinations",
+        JSON.stringify(savedDestinations)
+    );
+
+    button.textContent = "✓ Saved to My Travel Wall";
+    button.classList.add("saved");
+    button.disabled = true;
+}
+
+// DISPLAY RECOMMENDATIONS
+function displayRecommendations(recommendations) {
+    const grid = document.getElementById("recommendationGrid");
+    const noResults = document.getElementById("noRecommendations");
+
+    grid.innerHTML = "";
+    noResults.style.display = "none";
+
+    if (!recommendations.length) {
+        noResults.style.display = "block";
+        return;
+    }
+
+    recommendations.forEach(destination => {
+        const card = document.createElement("div");
+        card.className = "recommendation-card";
+
+        const imageHTML = destination.image
+            ? `<img src="${destination.image}" alt="${destination.name}"
+                   onerror="this.style.display='none';">`
+            : "";
+
+        card.innerHTML = `
+            ${imageHTML}
+
+            <div class="recommendation-content">
+                <h3>${destination.name}</h3>
+
+                <p>${destination.description}</p>
+
+                
+<div class="recommendation-details">
+    <span>
+        ${
+            destination.budget_min !== null &&
+            destination.budget_max !== null
+                ? `₹${destination.budget_min.toLocaleString("en-IN")}
+                   - ₹${destination.budget_max.toLocaleString("en-IN")}`
+                : "Budget not available"
+        }
+    </span>
+</div>
+
+
+                <p>${destination.days} days recommended</p>
+
+                <p>${destination.location}</p>
+
+                <button class="select-destination" type="button">
+                    Select Destination
+                </button>
+
+                <button class="save-travel-wall" type="button">
+                    ${isDestinationInTravelWall(destination.name)
+                        ? "✓ Saved to My Travel Wall"
+                        : "♡ Keep in My Travel Wall"}
+                </button>
+            </div>
+        `;
+
+        card.querySelector(".select-destination").addEventListener(
+            "click",
+            function(event) {
+                event.stopPropagation();
+                selectRecommendedDestination(destination);
+            }
+        );
+
+        const saveButton = card.querySelector(".save-travel-wall");
+
+        if (isDestinationInTravelWall(destination.name)) {
+            saveButton.classList.add("saved");
+            saveButton.disabled = true;
+        }
+
+        saveButton.addEventListener("click", function(event) {
+            event.stopPropagation();
+            saveToTravelWall(destination, saveButton);
+        });
+
+        grid.appendChild(card);
+    });
+}
+
+// RESTORE PREVIOUS RECOMMENDATION RESULTS
+function restoreRecommendationResults() {
+
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("restore") !== "recommendations") {
+        return;
+    }
+
+    try {
+
+        // Get previously saved preferences and recommendations
+        const preferences = JSON.parse(
+            localStorage.getItem("travelPreferences") || "{}"
+        );
+
+        const recommendations = JSON.parse(
+            localStorage.getItem("recommendationResults") || "[]"
+        );
+
+        // Restore preference form values
+        document.getElementById("startingCity").value =
+            preferences.startingCity || "";
+
+        document.getElementById("travelDays").value =
+            preferences.days || "";
+
+        document.getElementById("budget").value =
+            preferences.budget ?? "";
+
+        document.getElementById("travelType").value =
+            preferences.type || "";
+
+        document.getElementById("travellers").value =
+            preferences.travellers || "";
+
+        document.getElementById("travelCompany").value =
+            preferences.companion || "";
+
+        // Display the previous recommendation cards
+        displayRecommendations(recommendations);
+
+        // Hide the two choices and preference form
+        document.getElementById("choiceCards").style.display = "none";
+
+        document.getElementById("preferenceSection").style.display = "none";
+
+        // Show recommendation results
+        document.getElementById("recommendationsSection").style.display = "block";
+
+        // Scroll to the restored results
+        document.getElementById("recommendationsSection").scrollIntoView({
+            behavior: "smooth"
+        });
+
+        console.log(
+            "Previous recommendations restored:",
+            recommendations.length
+        );
+
+    } catch (error) {
+
+        console.error("Could not restore recommendations:", error);
+
+        alert("Unable to restore your previous recommendations.");
+
+    }
+}
+
+
+// FORM SUBMISSION - REAL BACKEND RECOMMENDATIONS
+
+document.getElementById("preferenceForm").addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+        const submitButton = document.querySelector(
+            "#preferenceForm .submit-button"
+        );
+
+        const startingCity =
+            document.getElementById("startingCity").value.trim();
+
+        const travelDays =
+            Number(document.getElementById("travelDays").value);
+
+        const budget =
+            Number(document.getElementById("budget").value);
+
+        const travelType =
+            document.getElementById("travelType").value;
+
+        const travellers =
+            document.getElementById("travellers").value;
+
+        const travelCompany =
+            document.getElementById("travelCompany").value;
+
+        const userId = localStorage.getItem("user_id");
+
+        if (!userId) {
+            alert("Please log in first to get personalized recommendations.");
+            window.location.href = "login.html";
+            return;
+        }
+
+        // Save preferences for the destination selection page
+        const preferences = {
+    startingCity: startingCity,
+    days: travelDays,
+    budget: budget,
+    type: travelType,
+    travellers: travellers,
+    companion: travelCompany
+};
+
+        localStorage.setItem(
+            "travelPreferences",
+            JSON.stringify(preferences)
+        );
+
+        // Match frontend categories with database categories
+        let apiTravelType = travelType;
+
+        if (travelType === "Hill Station") {
+            apiTravelType = "Mountain";
+        } else if (travelType === "Historical") {
+            apiTravelType = "Heritage";
+        }
+
+        submitButton.disabled = true;
+        submitButton.textContent = "Finding destinations...";
+
+        try {
+
+            // 1. Request recommendations from Flask
+            const response = await fetch(
+                "http://127.0.0.1:5000/api/plan-trip",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        user_id: Number(userId),
+                        starting_city: startingCity,
+                        number_of_days: travelDays,
+                        budget: budget,
+                        travel_type: apiTravelType,
+                        number_of_people: Number(travellers),
+                        companion: travelCompany
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message || "Could not generate recommendations."
+                );
+            }
+
+            const apiRecommendations = data.recommendations || [];
+
+            // 2. Fetch full destination details from MySQL
+            const recommendations = await Promise.all(
+                apiRecommendations.map(async (item) => {
+
+                    const destinationId =
+                        item.destination_id || item.id;
+
+                    const detailsResponse = await fetch(
+                        `http://127.0.0.1:5000/api/destinations/${destinationId}`
+                    );
+
+                    if (!detailsResponse.ok) {
+                        throw new Error(
+                            `Could not load details for ${item.name}.`
+                        );
+                    }
+
+                    const details = await detailsResponse.json();
+
+                    const minBudget = Number(
+                        details.budget_min ?? item.budget_min ?? 0
+                    );
+
+                    const maxBudget = Number(
+                        details.budget_max ?? item.budget_max ?? 0
+                    );
+
+                    return {
+                        ...item,
+                        ...details,
+
+                        id: destinationId,
+                        destination_id: destinationId,
+
+                        name: details.name || item.name,
+
+                        type:
+                            details.destination_type ||
+                            item.destination_type ||
+                            item.type,
+
+                        description:
+                            details.description ||
+                            "Explore this beautiful destination.",
+
+                        image:
+                            details.image_url ||
+                            item.image_url ||
+                            item.image,
+
+                        image_url:
+                            details.image_url ||
+                            item.image_url ||
+                            item.image,
+
+                        budget_min: minBudget,
+                        budget_max: maxBudget,
+
+                        budget_range:
+                            item.budget_range ||
+                            `₹${minBudget.toLocaleString("en-IN")} - ₹${maxBudget.toLocaleString("en-IN")}`,
+
+                        budget: minBudget,
+
+                        days: Number(
+                            item.recommended_days ||
+                            details.recommended_days ||
+                            3
+                        ),
+
+                        recommended_days: Number(
+                            item.recommended_days ||
+                            details.recommended_days ||
+                            3
+                        ),
+
+                        rating: Number(
+                            details.rating ?? item.rating ?? 0
+                        ),
+
+                        matchPercentage: Number(
+                            item.match_percentage ??
+                            item.matchPercentage ??
+                            0
+                        ),
+
+                        matchExplanation:
+                            item.match_explanation ||
+                            item.explanation ||
+                            "Matches your travel preferences."
+                    };
+                })
+            );
+
+            // Save recommendations so they can be restored
+// when the user returns from a destination page
+localStorage.setItem(
+    "recommendationResults",
+    JSON.stringify(recommendations)
+);
+
+            // 3. Display actual API recommendations
+            displayRecommendations(recommendations);
+
+            document.getElementById(
+                "preferenceSection"
+            ).style.display = "none";
+
+            document.getElementById(
+                "recommendationsSection"
+            ).style.display = "block";
+
+            document.getElementById(
+                "recommendationsSection"
+            ).scrollIntoView({
+                behavior: "smooth"
+            });
+
+        } catch (error) {
+
+            console.error("Recommendation error:", error);
+
+            alert(
+                error.message ||
+                "Unable to connect to the recommendation service."
+            );
+
+        } finally {
+
+            submitButton.disabled = false;
+            submitButton.textContent = "Find My Destinations";
+
+        }
+
+    }
+);
+
+
+
+// SELECT RECOMMENDED DESTINATION
+
+function selectRecommendedDestination(destination) {
+
+    const preferences = JSON.parse(
+        localStorage.getItem("travelPreferences") || "{}"
+    );
+
+    const selectedDestination = {
+        ...destination,
+        startingCity: preferences.startingCity || "",
+        travellers: preferences.travellers || "",
+        companion: preferences.companion || "",
+        travelPreferences: preferences
+    };
+
+    localStorage.setItem(
+        "selectedDestination",
+        JSON.stringify(selectedDestination)
+    );
+
+    localStorage.setItem("destinationSource", "recommendations");
+
+    window.location.href = "destination.html?source=recommendations";
+}
+
+// LOAD DATABASE DATA WHEN PAGE OPENS
+async function initializePage() {
+
+    await loadDestinations();
+
+    // Restore previous results only when returning from destination details
+    restoreRecommendationResults();
+
+}
+
+initializePage();
+
+</script>
+
+</body>
+</html>
