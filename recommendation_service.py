@@ -1,6 +1,8 @@
 
 from db import get_db_connection
 from math import sqrt
+import re
+import json
 
 
 # ==================================================
@@ -44,12 +46,70 @@ def is_any(value):
     return normalize(value) in ("", "any", "all", "no preference")
 
 
+def get_people_preference(preferences):
+    """Read traveller count without allowing a default value to hide another supplied value."""
+    values = [
+        preferences.get("number_of_people"),
+        preferences.get("numberOfPeople"),
+        preferences.get("travellers"),
+        preferences.get("people")
+    ]
+
+    valid = []
+    for value in values:
+        if value is not None and value != "":
+            number = safe_number(value, None)
+            if number is not None and number > 0:
+                valid.append(number)
+
+    if not valid:
+        return 1
+
+    # Prefer a non-default value if aliases contain conflicting values.
+    for number in valid:
+        if number != 1:
+            return number
+
+    return valid[0]
+
+
+def get_companion_preference(preferences):
+    """Read the selected companion and avoid an 'Any' default hiding a real selection."""
+    keys = (
+        "companion",
+        "travelCompany",
+        "travel_company",
+        "travel_companion"
+    )
+
+    values = [
+        preferences.get(key)
+        for key in keys
+        if preferences.get(key) is not None
+        and str(preferences.get(key)).strip() != ""
+    ]
+
+    for value in values:
+        if not is_any(value):
+            return str(value).strip()
+
+    return str(values[0]).strip() if values else "Any"
+
+
+def canonical_preferences(preferences):
+    result = dict(preferences or {})
+    result["number_of_people"] = get_people_preference(result)
+    result["companion"] = get_companion_preference(result)
+    return result
+
+
 # ==================================================
 # 2. DATABASE
 # ==================================================
 
 def get_all_destination_data():
     connection = get_db_connection()
+
     try:
         cursor = connection.cursor(dictionary=True)
         cursor.execute("SELECT * FROM destinations")
@@ -188,21 +248,30 @@ def calculate_weather_score(destination, preferences):
     return 25
 
 
+# ==================================================
+# 4. NUMBER OF TRAVELLERS SCORE
+# ==================================================
+
 def calculate_people_score(destination, preferences):
-    people = safe_number(get_preference(
-        preferences, "number_of_people", "people", default=1
-    ), 1)
+    people = get_people_preference(preferences)
 
     minimum = first_present(
-        destination, "min_group_size", "minimum_group_size", "min_people"
-    )
-    maximum = first_present(
-        destination, "max_group_size", "maximum_group_size", "max_people"
+        destination,
+        "min_group_size",
+        "minimum_group_size",
+        "min_people"
     )
 
-    # No group-size information in DB means no group-size penalty.
+    maximum = first_present(
+        destination,
+        "max_group_size",
+        "maximum_group_size",
+        "max_people"
+    )
+
+    # Missing database values should not create an artificial perfect score.
     if minimum is None and maximum is None:
-        return 100
+        return 50
 
     if people <= 0:
         return 50
@@ -210,33 +279,118 @@ def calculate_people_score(destination, preferences):
     minimum = safe_number(minimum, 1)
     maximum = safe_number(maximum, 999999)
 
-    return 100 if minimum <= people <= maximum else 40
+    # The selected group size is within the destination's supported range.
+    if minimum <= people <= maximum:
+        return 100
+
+    # Gradually reduce the score according to how far the group is
+    # outside the destination's supported group-size range.
+    if people < minimum:
+        difference = minimum - people
+    else:
+        difference = people - maximum
+
+    return clamp(100 - (difference * 25), 20, 100)
+
+
+# ==================================================
+# 5. TRAVEL COMPANION SCORE
+# ==================================================
+
+def companion_categories(value):
+    value = normalize(value)
+
+    aliases = {
+        "solo": {"solo", "single", "alone", "individual"},
+        "friends": {"friends", "friend", "group", "with friends"},
+        "family": {"family", "families", "with family"},
+        "partner": {
+            "partner", "couple", "couples", "spouse",
+            "husband", "wife", "with partner"
+        }
+    }
+
+    for category, terms in aliases.items():
+        if value in terms:
+            return {category}
+
+    return {value} if value else set()
+
+
+def parse_suitable_for(value):
+    """
+    Supports values such as:
+    Solo, Friends
+    Family/Friends
+    ["Solo", "Family"]
+    All
+    """
+    if value is None:
+        return set()
+
+    if isinstance(value, (list, tuple, set)):
+        values = value
+    else:
+        text = str(value).strip()
+
+        try:
+            parsed = json.loads(text)
+            if isinstance(parsed, list):
+                values = parsed
+            else:
+                values = re.split(r"[,;/|]+", text)
+        except (ValueError, TypeError):
+            values = re.split(r"[,;/|]+", text)
+
+    categories = set()
+
+    for item in values:
+        normalized = normalize(item)
+
+        if normalized in ("all", "everyone", "any", "all types"):
+            return {"all"}
+
+        categories.update(companion_categories(normalized))
+
+    return categories
 
 
 def calculate_companion_score(destination, preferences):
-    companion = normalize(get_preference(
-        preferences, "companion", "travel_company", default="Any"
-    ))
+    companion = get_companion_preference(preferences)
 
     if is_any(companion):
         return 100
 
-    actual = normalize(first_present(
-        destination, "suitable_for", "travel_companion",
-        "companion_type", "best_for"
-    ))
+    actual = first_present(
+        destination,
+        "suitable_for",
+        "travel_companion",
+        "companion_type",
+        "best_for"
+    )
 
-    # Do not invent companion suitability without DB data.
-    if not actual:
+    if actual is None:
+        return 50
+
+    selected_categories = companion_categories(companion)
+    suitable_categories = parse_suitable_for(actual)
+
+    if "all" in suitable_categories:
         return 100
 
-    if companion in actual or "all" in actual or "everyone" in actual:
+    if selected_categories.intersection(suitable_categories):
         return 100
 
-    return 40
+    return 20
 
+
+# ==================================================
+# 6. CONTENT-BASED SCORE
+# ==================================================
 
 def calculate_content_score(destination, preferences):
+    preferences = canonical_preferences(preferences)
+
     scores = {
         "type": calculate_type_score(destination, preferences),
         "budget": calculate_budget_score(destination, preferences),
@@ -261,10 +415,12 @@ def calculate_content_score(destination, preferences):
 
 
 # ==================================================
-# 4. KNOWLEDGE-BASED SCORING
+# 7. KNOWLEDGE-BASED SCORING
 # ==================================================
 
 def calculate_knowledge_score(destination, preferences):
+    preferences = canonical_preferences(preferences)
+
     total = (
         calculate_type_score(destination, preferences) * 0.25
         + calculate_budget_score(destination, preferences) * 0.25
@@ -279,7 +435,7 @@ def calculate_knowledge_score(destination, preferences):
 
 
 # ==================================================
-# 5. COLLABORATIVE FILTERING PROFILES
+# 8. COLLABORATIVE FILTERING PROFILES
 # ==================================================
 
 def get_user_profiles():
@@ -451,7 +607,7 @@ def calculate_collaborative_scores(destinations, user_id):
 
 
 # ==================================================
-# 6. MATCH EXPLANATION
+# 9. MATCH EXPLANATION
 # ==================================================
 
 def create_match_explanation(destination, preferences):
@@ -489,6 +645,14 @@ def create_match_explanation(destination, preferences):
         if calculate_weather_score(destination, preferences) >= 75:
             reasons.append("matches your stored weather preference")
 
+    if calculate_people_score(destination, preferences) >= 80:
+        reasons.append("is suitable for your group size")
+
+    if calculate_companion_score(destination, preferences) >= 80:
+        companion = get_companion_preference(preferences)
+        if not is_any(companion):
+            reasons.append("matches your travel companion")
+
     if not reasons:
         return "Recommended based on the overall hybrid score."
 
@@ -496,7 +660,7 @@ def create_match_explanation(destination, preferences):
 
 
 # ==================================================
-# 7. FORMAT RECOMMENDATION
+# 10. FORMAT RECOMMENDATION
 # ==================================================
 
 def format_recommendation(destination, match_percentage):
@@ -561,10 +725,13 @@ def format_recommendation(destination, match_percentage):
 
 
 # ==================================================
-# 8. MAIN HYBRID RECOMMENDER
+# 11. MAIN HYBRID RECOMMENDER
 # ==================================================
 
 def get_recommendations(preferences, user_id=None, limit=3):
+    # Canonicalize inputs once so scoring functions receive the same values.
+    preferences = canonical_preferences(preferences)
+
     destinations = get_all_destination_data()
 
     if not destinations:
@@ -585,6 +752,14 @@ def get_recommendations(preferences, user_id=None, limit=3):
         if destination_id <= 0:
             continue
 
+        people_score = calculate_people_score(
+            destination, preferences
+        )
+
+        companion_score = calculate_companion_score(
+            destination, preferences
+        )
+
         content_score = calculate_content_score(
             destination, preferences
         )
@@ -598,7 +773,7 @@ def get_recommendations(preferences, user_id=None, limit=3):
             destination, preferences
         )
 
-        # Exact hybrid weights: 50% + 25% + 25%.
+        # Keep existing hybrid weights: 50% + 25% + 25%.
         hybrid_score = (
             content_score * 0.50
             + collaborative_score * 0.25
@@ -617,6 +792,10 @@ def get_recommendations(preferences, user_id=None, limit=3):
             knowledge_score, 2
         )
 
+        # Expose these two scores in the API response for verification.
+        recommendation["people_score"] = round(people_score, 2)
+        recommendation["companion_score"] = round(companion_score, 2)
+
         recommendation["match_explanation"] = create_match_explanation(
             destination, preferences
         )
@@ -631,6 +810,7 @@ def get_recommendations(preferences, user_id=None, limit=3):
 
         final_recommendations.append(recommendation)
 
+    # Sort using the updated final hybrid score.
     final_recommendations.sort(
         key=lambda item: item["match_percentage"],
         reverse=True
