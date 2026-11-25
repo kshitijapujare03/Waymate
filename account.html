@@ -34,50 +34,49 @@ body {
 /* NAVBAR - MATCHING HOME PAGE */
 
 .navbar {
-    height:75px;
-    background:white;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 8%;
-    box-shadow:0 2px 10px rgba(0,0,0,0.06);
-    position:relative;
-    z-index:10;
+    height: 75px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    position: relative;
+    z-index: 10;
 }
 
 .logo {
-    font-size:28px;
-    font-weight:bold;
-    color:#0b6670;
-    white-space:nowrap;
+    font-size: 28px;
+    font-weight: bold;
+    color: #0b6670;
 }
 
 .logo span {
-    font-size:30px;
-    margin-right:6px;
+    font-size: 30px;
+    margin-right: 6px;
 }
 
 .nav-links {
-    display:flex;
-    align-items:center;
-    gap:30px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
 }
 
 .nav-links a {
-    text-decoration:none;
-    font-size:15px;
-    color:#24565d;
-    font-weight:500;
-    transition:0.3s;
+    font-size: 15px;
+    color: #24565d;
+    font-weight: 500;
+    text-decoration: none;
+    transition: 0.3s;
 }
 
-.nav-links a:hover {
-    color:#0b8994;
+.nav-links a:hover,
+.nav-links a.active {
+    color: #0b8994;
 }
 
 .nav-links a.active {
-    color:#0b8994;
-    font-weight:700;
+    font-weight: bold;
 }
 
 .profile-icon {
@@ -106,8 +105,9 @@ body {
 }
 
 .page-heading h1 {
-    font-size:32px;
-    font-weight:700;
+    font-size: 30px;
+    color: #174d4a;
+    font-weight: 700;
 }
 
 .page-heading p {
@@ -460,18 +460,16 @@ footer {
 <!-- NAVBAR -->
 
 <nav class="navbar">
-
-    <div class="logo"><span>✈</span> Waymate</div>
+    <div class="logo">
+        <span>✈</span> Waymate
+    </div>
 
     <div class="nav-links">
         <a href="home.html">Home</a>
-        <a href="explore.html">Explore</a>
+        <a href="destination-choice.html">Explore</a>
         <a href="trips.html">My Trips</a>
         <a href="account.html" class="active">My Account</a>
     </div>
-
-    <a href="account.html" class="profile-icon" aria-label="My Account">♙</a>
-
 </nav>
 
 <main class="container">

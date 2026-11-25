@@ -112,6 +112,14 @@
             opacity: 0.6;
             cursor: not-allowed;
         }
+        
+    /* DESTINATION PAGE MAIN HEADING */
+.destination-main-info h1 {
+    margin: 0 0 8px;
+    color: #174d4a;
+    font-size: 36px;
+    font-weight: 700;
+}
     </style>
 </head>
 
@@ -119,28 +127,26 @@
 
     <div class="destination-page">
 
-        <nav class="navbar">
+      <nav class="navbar">
+    <div class="logo">
+        <span class="logo-icon">✈</span>
+        <span class="logo-text">Waymate</span>
+    </div>
 
-            <div class="logo">
-                <span>Way</span>mate
-            </div>
-
-            <div class="nav-links">
-                <a href="home.html">Home</a>
-                <a href="explore.html">Explore</a>
-                <a href="plan.html">Plan My Trip</a>
-                <a href="trips.html">My Trips</a>
-                <a href="account.html">My Account</a>
-            </div>
-
-        </nav>
+    <div class="nav-links">
+        <a href="home.html">Home</a>
+        <a href="explore.html" class="active">Explore</a>
+        <a href="trips.html">My Trips</a>
+        <a href="account.html">My Account</a>
+    </div>
+</nav>
 
 
         <main class="destination-container">
 
             <a href="#" class="back-button" id="backButton">
-                ΓåÉ Back
-            </a>
+    &#8592; Go Back
+</a>
 
             <div id="destinationContent"></div>
 
@@ -587,12 +593,29 @@ const durationText =
 
             const spots = destination.spots || [];
 
-            const mapSearch = destination.latitude && destination.longitude
-                ? `${destination.latitude},${destination.longitude}`
-                : `${destination.name}, ${destination.location || "India"}`;
+            
+const mapSearch = destination.latitude && destination.longitude
+    ? `${destination.latitude},${destination.longitude}`
+    : `${destination.name}, ${destination.location || "India"}`;
 
-            const mapsURL =
-                `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapSearch)}`;
+// Get the starting city saved from the recommendation form
+let startingCity = "";
+
+try {
+    const preferences = JSON.parse(
+        localStorage.getItem("travelPreferences") || "{}"
+    );
+
+    startingCity = preferences.startingCity || "";
+
+} catch (error) {
+    console.error("Could not get starting city:", error);
+}
+
+// Create Google Maps directions URL
+const mapsURL = startingCity
+    ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(startingCity)}&destination=${encodeURIComponent(mapSearch)}&travelmode=driving`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapSearch)}`;
 
 
             destinationContent.innerHTML = `
@@ -630,11 +653,12 @@ const durationText =
                     <div class="destination-buttons">
 
                         <button
-                            id="saveButton"
-                            onclick="toggleSave()"
-                        >
-                            ♡ Save Destination
-                        </button>
+    id="saveButton"
+    class="save-button"
+    onclick="toggleSave()"
+>
+    ♡ Save Destination
+</button>
 
                         <button
                             type="button"

@@ -560,11 +560,11 @@
 
     <div class="nav-links">
         <a href="home.html">Home</a>
-        <a href="destination-choice.html">Explore</a>
+        <a href="destination-choice.html" class="active">Explore</a>
         <a href="trips.html">My Trips</a>
         <a href="account.html">My Account</a>
 
-        <div class="profile">♙</div>
+        
     </div>
 
 </nav>
@@ -707,18 +707,19 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="travellers">Number of Travellers</label>
-                        <select id="travellers" required>
-                            <option value="">Select travellers</option>
-                            <option value="1">1 Person</option>
-                            <option value="2">2 People</option>
-                            <option value="3">3 People</option>
-                            <option value="4">4 People</option>
-                            <option value="5">5 People</option>
-                            <option value="6">6 or More People</option>
-                        </select>
-                    </div>
+<div class="form-group">
+    <label for="travellers">Number of Travellers</label>
+    <select id="travellers" required>
+        <option value="">Select travellers</option>
+        <option value="1">1 Person</option>
+        <option value="2">2 People</option>
+        <option value="3">3 People</option>
+        <option value="4">4 People</option>
+        <option value="5">5 People</option>
+        <option value="6">6 or More People</option>
+    </select>
+</div>
+
 
                     <div class="form-group">
                         <label for="travelCompany">Who are you travelling with?</label>
@@ -962,6 +963,86 @@ function backToForm() {
         behavior: "smooth"
     });
 }
+
+
+ // CONTROL VALID TRAVELLER AND COMPANION COMBINATIONS
+
+const peopleSelect = document.getElementById("travellers");
+const companionSelect = document.getElementById("travelCompany");
+
+function updateTravelCombination(changedField) {
+
+    const companion = companionSelect.value;
+
+    // When companion is selected, adjust traveller count
+    if (changedField === "companion") {
+
+        if (companion === "Solo") {
+            peopleSelect.value = "1";
+        }
+
+        else if (companion === "Partner") {
+            peopleSelect.value = "2";
+        }
+
+        else if (
+            companion === "Friends" ||
+            companion === "Family"
+        ) {
+            if (Number(peopleSelect.value) < 2) {
+                peopleSelect.value = "2";
+            }
+        }
+    }
+
+    const selectedPeople = Number(peopleSelect.value);
+
+    // Enable or disable companion options
+    Array.from(companionSelect.options).forEach(option => {
+
+        if (option.value === "") {
+            option.disabled = false;
+        }
+
+        else if (option.value === "Solo") {
+            option.disabled = selectedPeople !== 1;
+        }
+
+        else if (
+            option.value === "Partner" ||
+            option.value === "Friends" ||
+            option.value === "Family"
+        ) {
+            option.disabled = selectedPeople < 2;
+        }
+    });
+
+    // When traveller count changes, select a valid companion
+    if (changedField === "people") {
+
+        if (selectedPeople === 1) {
+            companionSelect.value = "Solo";
+        }
+
+        else if (companionSelect.value === "Solo") {
+            companionSelect.value = "Friends";
+        }
+    }
+}
+
+// Run when number of travellers changes
+peopleSelect.addEventListener("change", function () {
+    updateTravelCombination("people");
+});
+
+// Run when companion changes
+companionSelect.addEventListener("change", function () {
+    updateTravelCombination("companion");
+});
+
+// Set the correct option when the page loads
+updateTravelCombination("people");
+
 // MAP FORM CATEGORY TO DATABASE CATEGORY
 
 function matchesTravelType(destination, preferredType) {
@@ -1453,6 +1534,13 @@ document.getElementById("preferenceForm").addEventListener(
                     };
                 })
             );
+
+            // Save recommendations so they can be restored
+// when the user returns from a destination page
+localStorage.setItem(
+    "recommendationResults",
+    JSON.stringify(recommendations)
+);
 
             // 3. Display actual API recommendations
             displayRecommendations(recommendations);
